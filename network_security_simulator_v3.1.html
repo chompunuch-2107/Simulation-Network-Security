@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>แบบจำลองการเรียนรู้ — เครือข่ายคอมพิวเตอร์และความปลอดภัย</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;min-height:100vh;overflow-x:hidden;}
+:root{
+  --bg-page:#F0F6FF;--bg-card:#FFFFFF;--bg-muted:#EEF4FF;--bg-hover:#E3EDFF;
+  --border:#C5D8F8;--border-mid:#A0BDF0;
+  --txt:#1A2A4A;--txt2:#4A6080;--txt3:#8099BB;
+  --l7:#EDE9FF;--l7t:#4C2E9E;--l6:#D6F5EC;--l6t:#0D6B52;
+  --l5:#FFF3DA;--l5t:#7A4800;--l4:#D9ECFF;--l4t:#084F96;
+  --l3:#E4F5D4;--l3t:#2B5F10;--l2:#FFE8E8;--l2t:#8B1E1E;--l1:#F3EFE4;--l1t:#4A4338;
+  --osi-accent:#4A6FE3;--packet-accent:#0D9E6E;--attack-accent:#E04444;
+  --encrypt-accent:#9B4DE0;--quiz-accent:#D97706;--netdesign-accent:#0891B2;
+  --printer-accent:#7C3AED;--ipconfig-accent:#059669;
+  --success-bg:#D4F7E7;--success-txt:#0A6B46;
+  --danger-bg:#FFE4E4;--danger-txt:#991B1B;
+  --warn-bg:#FEF3C7;--warn-txt:#92400E;
+  --info-bg:#DBEAFE;--info-txt:#1D4ED8;
+  --shadow-sm:0 1px 4px rgba(74,111,227,.10);--shadow-md:0 4px 16px rgba(74,111,227,.12);
+  --radius:12px;--radius-sm:8px;
+}
+body{font-family:'Sarabun',sans-serif;background:var(--bg-page);color:var(--txt);font-size:16px;}
+.app{max-width:100%;width:100%;padding:0.75rem 1rem 3rem;}
+@media(min-width:900px){.app{max-width:960px;margin:0 auto;}}
+
+/* ─── Header ─── */
+.header{
+  background:linear-gradient(135deg,#1B3FAD 0%,#0E83C0 100%);
+  border-radius:16px;padding:1.25rem 1.5rem;margin-bottom:1.25rem;
+  color:#fff;box-shadow:0 6px 28px rgba(27,63,173,.32);position:relative;overflow:hidden;
+}
+.header::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 80% 40%,rgba(255,255,255,.14) 0%,transparent 60%);}
+.header-top{position:relative;display:flex;align-items:flex-start;gap:10px;}
+.header-icon{font-size:36px;flex-shrink:0;margin-top:2px;}
+.header h1{font-size:18px;font-weight:700;line-height:1.4;}
+.header-sub{font-size:14px;opacity:.88;margin-top:3px;font-weight:500;}
+.header-teacher{font-size:13px;opacity:.8;margin-top:2px;}
+.header-badges{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;position:relative;}
+.hbadge{background:rgba(255,255,255,.18);color:#fff;border-radius:20px;padding:3px 11px;font-size:12px;font-weight:500;}
+
+/* ─── Tabs ─── */
+.tabs{
+  display:flex;gap:5px;flex-wrap:wrap;
+  margin-bottom:1.25rem;background:var(--bg-card);
+  padding:7px;border-radius:14px;border:1px solid var(--border);box-shadow:var(--shadow-sm);
+}
+.tab{
+  padding:9px 13px;border-radius:9px;font-size:14px;
+  cursor:pointer;border:none;background:transparent;color:var(--txt2);
+  transition:all .18s;font-family:'Sarabun',sans-serif;font-weight:500;
+  display:flex;align-items:center;gap:5px;
+}
+.tab .tab-icon{font-size:16px;}
+.tab:hover:not(.active){background:var(--bg-muted);color:var(--txt);}
+.tab.active{color:#fff;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.18);}
+.tab[data-sec="osi"].active      {background:var(--osi-accent);}
+.tab[data-sec="packet"].active   {background:var(--packet-accent);}
+.tab[data-sec="attack"].active   {background:var(--attack-accent);}
+.tab[data-sec="encrypt"].active  {background:var(--encrypt-accent);}
+.tab[data-sec="netdesign"].active{background:var(--netdesign-accent);}
+.tab[data-sec="printer"].active  {background:var(--printer-accent);}
+.tab[data-sec="ipconfig"].active {background:var(--ipconfig-accent);}
+.tab[data-sec="quiz"].active     {background:var(--quiz-accent);}
+
+.section{display:none;}
+.section.active{display:block;animation:fadeUp .22s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:translateY(0);}}
+
+/* ─── Cards ─── */
+.card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:1.25rem 1.5rem;
+  margin-bottom:1rem;box-shadow:var(--shadow-sm);
+}
+.card-title{
+  font-size:16px;font-weight:700;color:var(--txt);
+  margin-bottom:0.75rem;display:flex;align-items:center;gap:8px;
+}
+.card-accent{width:4px;height:20px;border-radius:2px;flex-shrink:0;}
+.card-desc{font-size:13px;color:var(--txt2);margin-bottom:1rem;line-height:1.6;}
+
+/* ─── Badges ─── */
+.badge{display:inline-block;padding:3px 11px;border-radius:20px;font-size:12px;font-weight:600;}
+.badge-info   {background:var(--info-bg);   color:var(--info-txt);}
+.badge-success{background:var(--success-bg);color:var(--success-txt);}
+.badge-warn   {background:var(--warn-bg);   color:var(--warn-txt);}
+.badge-danger {background:var(--danger-bg); color:var(--danger-txt);}
+
+/* ─── Section labels ─── */
+.section-label{display:flex;align-items:center;gap:10px;margin-bottom:1rem;}
+.section-label-bar{width:5px;height:28px;border-radius:3px;flex-shrink:0;}
+.section-label-text h2{font-size:18px;font-weight:700;}
+.section-label-text p{font-size:13px;color:var(--txt2);margin-top:2px;}
+
+/* ─── Buttons ─── */
+.btn{
+  padding:10px 20px;border-radius:9px;border:1.5px solid var(--border);
+  background:var(--bg-card);color:var(--txt);cursor:pointer;
+  font-size:14px;font-family:'Sarabun',sans-serif;font-weight:600;
+  transition:all .15s;
+}
+.btn:hover{background:var(--bg-muted);border-color:var(--border-mid);}
+.btn-primary{background:var(--osi-accent);color:#fff;border-color:transparent;}
+.btn-primary:hover{opacity:.87;background:var(--osi-accent);}
+.btn-success{background:var(--success-txt);color:#fff;border-color:transparent;}
+.btn-danger {background:var(--attack-accent);color:#fff;border-color:transparent;}
+.btn-warn   {background:#D97706;color:#fff;border-color:transparent;}
+.btn-purple {background:var(--printer-accent);color:#fff;border-color:transparent;}
+.btn-green  {background:var(--ipconfig-accent);color:#fff;border-color:transparent;}
+
+/* ─── OSI Layers ─── */
+.osi-layer{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:9px;margin-bottom:5px;cursor:pointer;
+  transition:all .15s;border:1.5px solid transparent;
+}
+.osi-layer:hover{border-color:var(--border-mid);transform:translateX(2px);}
+.osi-num{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;}
+.osi-info{flex:1;}
+.osi-name{font-size:15px;font-weight:600;color:var(--txt);}
+.osi-desc{font-size:12px;color:var(--txt2);margin-top:2px;}
+.osi-detail{
+  display:none;background:var(--bg-muted);border-radius:8px;
+  padding:10px 14px;margin:-3px 0 6px 42px;
+  font-size:13px;color:var(--txt2);line-height:1.7;
+  border-left:3px solid var(--border-mid);
+}
+.osi-detail.show{display:block;}
+
+/* ─── Activity (drag-drop) ─── */
+.osi-activity-section{
+  background:linear-gradient(135deg,#F0F6FF,#E8F4FF);
+  border:2px solid var(--osi-accent);border-radius:var(--radius);
+  padding:1.25rem;margin-bottom:1rem;
+}
+.activity-title{font-size:15px;font-weight:700;color:var(--osi-accent);margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+.activity-desc{font-size:13px;color:var(--txt2);margin-bottom:1rem;}
+.answer-pool{
+  display:flex;flex-wrap:wrap;gap:8px;
+  background:#fff;border:1.5px dashed var(--border-mid);
+  border-radius:10px;padding:12px;margin-bottom:1rem;min-height:52px;
+}
+.chip{
+  padding:7px 16px;border-radius:20px;font-size:13px;font-weight:600;
+  cursor:grab;user-select:none;border:1.5px solid transparent;
+  transition:transform .15s,box-shadow .15s;white-space:nowrap;
+}
+.chip:active{cursor:grabbing;}
+.chip.dragging{opacity:.4;}
+.chip:hover{transform:scale(1.05);box-shadow:0 3px 10px rgba(0,0,0,.15);}
+.osi-fill-rows{display:flex;flex-direction:column;gap:6px;}
+.osi-fill-row{
+  display:flex;align-items:center;gap:10px;
+  background:#fff;border:1.5px solid var(--border);
+  border-radius:9px;padding:9px 12px;transition:border-color .2s;
+}
+.osi-fill-row .layer-num-badge{width:30px;height:30px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;}
+.osi-fill-row .layer-hint{font-size:13px;color:var(--txt2);flex:1;line-height:1.5;}
+.drop-zone{
+  min-width:150px;min-height:34px;border:2px dashed var(--border-mid);
+  border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-size:12px;color:var(--txt3);transition:all .2s;padding:4px 8px;
+}
+.drop-zone.drag-over{border-color:var(--osi-accent);background:var(--bg-hover);}
+.drop-zone.correct  {border-color:var(--success-txt);background:var(--success-bg);}
+.drop-zone.wrong    {border-color:var(--danger-txt); background:var(--danger-bg);}
+.activity-controls{display:flex;gap:8px;margin-top:1rem;align-items:center;flex-wrap:wrap;}
+.activity-score{font-size:14px;color:var(--txt2);margin-left:auto;}
+.activity-score strong{color:var(--txt);}
+
+/* ─── Packet ─── */
+.packet-layer{border:1px solid var(--border);border-radius:9px;overflow:hidden;margin-bottom:7px;}
+.pl-header{padding:10px 14px;font-size:14px;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center;}
+.pl-body{padding:10px 14px;font-size:13px;color:var(--txt2);line-height:1.8;display:none;border-top:1px solid var(--border);background:var(--bg-muted);}
+.pl-body.open{display:block;}
+.pl-field{display:flex;justify-content:space-between;margin-bottom:5px;align-items:center;gap:8px;}
+.pl-key{color:var(--txt2);}
+.pl-val{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--txt);background:var(--bg-hover);padding:2px 8px;border-radius:4px;}
+
+/* ─── Attack ─── */
+.attack-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem;}
+.attack-btn{padding:14px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;text-align:left;background:var(--bg-card);transition:all .15s;font-family:'Sarabun',sans-serif;}
+.attack-btn:hover{background:var(--bg-muted);border-color:var(--border-mid);}
+.attack-btn.selected{border-color:var(--attack-accent);background:var(--danger-bg);}
+.attack-btn.selected .ab-title{color:var(--attack-accent);}
+.ab-title{font-size:14px;font-weight:700;color:var(--txt);}
+.ab-sub  {font-size:12px;color:var(--txt2);margin-top:3px;}
+.log-box{
+  background:#0d1117;color:#58a6ff;font-family:'IBM Plex Mono',monospace;
+  font-size:12px;padding:14px;border-radius:10px;
+  height:150px;overflow-y:auto;line-height:1.9;border:1px solid #30363d;
+}
+.log-line{opacity:0;animation:fadeIn .3s forwards;}
+.log-warn{color:#f0a500;}.log-danger{color:#ff6b6b;}.log-ok{color:#56d364;}
+@keyframes fadeIn{to{opacity:1;}}
+
+/* ─── Encryption ─── */
+.enc-input{
+  width:100%;border:1.5px solid var(--border);border-radius:8px;
+  padding:10px 14px;font-size:14px;background:var(--bg-card);
+  color:var(--txt);font-family:'Sarabun',sans-serif;outline:none;transition:border-color .2s;
+}
+.enc-input:focus{border-color:var(--encrypt-accent);}
+
+/* ─── Quiz ─── */
+.quiz-q{font-size:16px;font-weight:600;color:var(--txt);margin-bottom:1rem;line-height:1.6;}
+.quiz-opts{display:grid;gap:9px;}
+.quiz-opt{
+  padding:12px 16px;border:1.5px solid var(--border);border-radius:9px;
+  cursor:pointer;font-size:14px;color:var(--txt);background:var(--bg-card);
+  transition:all .15s;text-align:left;font-family:'Sarabun',sans-serif;font-weight:500;
+}
+.quiz-opt:hover:not(:disabled){background:var(--bg-hover);border-color:var(--border-mid);}
+.quiz-opt.correct{background:var(--success-bg);color:var(--success-txt);border-color:var(--success-txt);}
+.quiz-opt.wrong  {background:var(--danger-bg); color:var(--danger-txt); border-color:var(--danger-txt);}
+.quiz-feedback{padding:12px 16px;border-radius:9px;font-size:14px;margin-top:.75rem;line-height:1.6;display:none;}
+.quiz-feedback.show{display:block;}
+.progress-bar{height:6px;background:var(--bg-muted);border-radius:3px;margin-bottom:1rem;overflow:hidden;}
+.progress-fill{height:100%;background:var(--quiz-accent);border-radius:3px;transition:width .3s;}
+.score-ring{width:84px;height:84px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.score-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--txt);}
+.result-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-top:1rem;}
+.result-stat{background:var(--bg-muted);border-radius:9px;padding:12px;text-align:center;border:1px solid var(--border);}
+.rs-val{font-size:24px;font-weight:700;color:var(--txt);}
+.rs-label{font-size:12px;color:var(--txt2);margin-top:3px;}
+
+/* ─── Network Design ─── */
+.net-design-wrapper{display:grid;grid-template-columns:180px 1fr;gap:1rem;}
+@media(max-width:600px){.net-design-wrapper{grid-template-columns:1fr;}}
+.device-palette{background:var(--bg-muted);border:1.5px solid var(--border);border-radius:var(--radius);padding:1rem;}
+.palette-title{font-size:14px;font-weight:700;color:var(--netdesign-accent);margin-bottom:10px;}
+.palette-item{
+  display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:grab;
+  font-size:13px;font-weight:600;color:var(--txt);background:var(--bg-card);
+  border:1.5px solid var(--border);margin-bottom:6px;user-select:none;transition:all .15s;
+}
+.palette-item:hover{border-color:var(--netdesign-accent);background:var(--bg-hover);transform:translateX(2px);}
+.canvas-area{
+  background:#FAFCFF;border:2px dashed var(--border-mid);
+  border-radius:var(--radius);position:relative;min-height:360px;overflow:hidden;
+}
+.canvas-area.drag-over-canvas{border-color:var(--netdesign-accent);background:#EEF8FF;}
+.canvas-area::before{content:'';position:absolute;inset:0;background-image:radial-gradient(var(--border) 1px,transparent 1px);background-size:24px 24px;opacity:.5;pointer-events:none;}
+.net-node{position:absolute;display:flex;flex-direction:column;align-items:center;cursor:move;user-select:none;z-index:5;transition:filter .15s;}
+.net-node:hover{filter:drop-shadow(0 3px 8px rgba(0,0,0,.2));z-index:10;}
+.net-node-icon{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;border:2px solid transparent;background:var(--bg-card);box-shadow:0 2px 8px rgba(0,0,0,.12);transition:border-color .2s;}
+.net-node.selected .net-node-icon{border-color:var(--netdesign-accent);box-shadow:0 0 0 3px rgba(8,145,178,.25);}
+.net-node-label{font-size:11px;font-weight:600;color:var(--txt);margin-top:4px;text-align:center;max-width:70px;}
+.net-node .delete-btn{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:var(--attack-accent);color:#fff;font-size:10px;border:none;cursor:pointer;display:none;align-items:center;justify-content:center;line-height:1;}
+.net-node.selected .delete-btn{display:flex;}
+.canvas-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;}
+.net-connection{stroke:var(--border-mid);stroke-width:2;fill:none;}
+.design-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem;align-items:center;}
+.tool-btn{padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;border:1.5px solid var(--border);background:var(--bg-card);color:var(--txt);cursor:pointer;font-family:'Sarabun',sans-serif;transition:all .15s;}
+.tool-btn:hover{background:var(--bg-hover);}
+.tool-btn.active{background:var(--netdesign-accent);color:#fff;border-color:transparent;}
+.challenge-panel{background:linear-gradient(135deg,#EEF8FF,#E8F5FF);border:2px solid var(--netdesign-accent);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1rem;}
+.challenge-title{font-size:15px;font-weight:700;color:var(--netdesign-accent);margin-bottom:6px;}
+.challenge-desc{font-size:13px;color:var(--txt);line-height:1.6;margin-bottom:10px;}
+.requirement-list{list-style:none;}
+.requirement-list li{font-size:13px;color:var(--txt2);padding:4px 0;display:flex;align-items:center;gap:8px;}
+.req-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--border-mid);background:var(--bg-card);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .3s;}
+.req-check.done{background:var(--success-txt);border-color:var(--success-txt);color:#fff;}
+.mode-indicator{position:absolute;top:10px;right:10px;background:rgba(255,255,255,.95);border:1.5px solid var(--border-mid);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--txt2);z-index:20;}
+.mode-indicator.connect-mode{color:var(--netdesign-accent);border-color:var(--netdesign-accent);background:#EEF8FF;}
+.net-info-bar{background:var(--bg-muted);border-top:1px solid var(--border);padding:8px 12px;display:flex;gap:16px;font-size:12px;color:var(--txt2);}
+.verify-result{padding:12px 16px;border-radius:9px;font-size:14px;font-weight:600;margin-top:.75rem;display:none;}
+.verify-result.show{display:block;}
+
+/* ─── Printer Share Simulator ─── */
+.printer-network{display:flex;flex-direction:column;gap:12px;}
+.net-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.pc-box{
+  background:#fff;border:2px solid var(--border);border-radius:12px;
+  padding:14px 18px;text-align:center;cursor:pointer;transition:all .2s;min-width:110px;
+}
+.pc-box:hover{border-color:var(--printer-accent);}
+.pc-box.selected{border-color:var(--printer-accent);background:#F5F0FF;box-shadow:0 0 0 3px rgba(124,58,237,.15);}
+.pc-box.has-printer{border-color:#7C3AED;background:#F5F0FF;}
+.pc-icon{font-size:28px;margin-bottom:4px;}
+.pc-label{font-size:13px;font-weight:600;color:var(--txt);}
+.pc-ip{font-size:11px;color:var(--txt2);font-family:'IBM Plex Mono',monospace;}
+.printer-box{
+  background:#fff;border:2px solid #7C3AED;border-radius:12px;
+  padding:14px 18px;text-align:center;min-width:110px;
+}
+.print-job-area{background:#0d1117;border-radius:10px;padding:12px;height:130px;overflow-y:auto;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.8;border:1px solid #30363d;}
+.steps-list{list-style:none;counter-reset:step;}
+.steps-list li{
+  counter-increment:step;padding:10px 12px 10px 46px;position:relative;
+  font-size:13px;color:var(--txt);line-height:1.6;margin-bottom:6px;
+  background:var(--bg-muted);border-radius:8px;border:1px solid var(--border);
+}
+.steps-list li::before{
+  content:counter(step);position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  width:26px;height:26px;border-radius:50%;background:var(--printer-accent);
+  color:#fff;display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;
+}
+.steps-list li.active-step{background:#F5F0FF;border-color:#7C3AED;}
+.arrow-line{font-size:22px;color:var(--border-mid);}
+
+/* ─── IP Config Simulator ─── */
+.ip-form{display:grid;gap:12px;}
+.ip-row{display:grid;grid-template-columns:180px 1fr;gap:10px;align-items:center;}
+.ip-label{font-size:14px;font-weight:600;color:var(--txt);}
+.ip-input{
+  border:1.5px solid var(--border);border-radius:8px;padding:9px 13px;
+  font-size:14px;font-family:'IBM Plex Mono',monospace;background:var(--bg-card);
+  color:var(--txt);outline:none;transition:border-color .2s;width:100%;
+}
+.ip-input:focus{border-color:var(--ipconfig-accent);}
+.ip-input.valid  {border-color:var(--success-txt);background:var(--success-bg);}
+.ip-input.invalid{border-color:var(--danger-txt); background:var(--danger-bg);}
+.ip-hint{font-size:11px;color:var(--txt2);margin-top:3px;}
+.ip-result-card{background:var(--bg-muted);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;}
+.ip-result-row{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--border);}
+.ip-result-row:last-child{border-bottom:none;}
+.ip-result-key{color:var(--txt2);font-weight:500;}
+.ip-result-val{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--txt);font-weight:600;}
+.ip-class-badge{display:inline-block;padding:4px 14px;border-radius:20px;font-size:13px;font-weight:700;}
+.ip-scenario{background:var(--bg-muted);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;cursor:pointer;transition:all .15s;margin-bottom:8px;}
+.ip-scenario:hover{border-color:var(--ipconfig-accent);background:#ECFDF5;}
+.ip-scenario.active{border-color:var(--ipconfig-accent);background:#ECFDF5;}
+.ip-scenario-title{font-size:14px;font-weight:700;color:var(--txt);}
+.ip-scenario-desc{font-size:12px;color:var(--txt2);margin-top:3px;}
+.ip-visual{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:1rem 0;}
+.ip-device{background:#fff;border:2px solid var(--border);border-radius:10px;padding:10px 14px;text-align:center;min-width:100px;}
+.ip-device.highlight{border-color:var(--ipconfig-accent);background:#ECFDF5;}
+.ip-device-icon{font-size:24px;margin-bottom:4px;}
+.ip-device-ip{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--txt);}
+.ip-line{flex:1;height:2px;background:var(--border-mid);min-width:20px;}
+.ip-line.active{background:var(--ipconfig-accent);}
+.ping-result{font-family:'IBM Plex Mono',monospace;font-size:12px;background:#0d1117;color:#56d364;padding:12px;border-radius:8px;height:90px;overflow-y:auto;line-height:1.8;}
+@media(max-width:600px){
+  .ip-row{grid-template-columns:1fr;}
+  .attack-grid{grid-template-columns:1fr;}
+  .net-design-wrapper{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <div class="header-icon">🌐</div>
+      <div>
+        <h1>แบบจำลองการเรียนรู้<br>รายวิชาเครือข่ายคอมพิวเตอร์และความปลอดภัย<br><span style="font-size:15px;opacity:.92">Computer Network and Security</span></h1>
+        <div class="header-sub">ระดับ ปวส.</div>
+        <div class="header-teacher">👩‍🏫 อาจารย์ประจำวิชา อ.ชมพูนุช สาตร์พันธุ์</div>
+      </div>
+    </div>
+    <div class="header-badges">
+      <span class="hbadge">🧩 OSI Model</span>
+      <span class="hbadge">📦 Packet</span>
+      <span class="hbadge">⚔️ Attack</span>
+      <span class="hbadge">🔐 Encryption</span>
+      <span class="hbadge">🏗️ ออกแบบเครือข่าย</span>
+      <span class="hbadge">🖨️ Printer Share</span>
+      <span class="hbadge">🔧 IP Config</span>
+      <span class="hbadge">📝 ทดสอบ</span>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" data-sec="osi"       onclick="switchTab('osi',this)"><span class="tab-icon">🧩</span>OSI</button>
+    <button class="tab"        data-sec="packet"    onclick="switchTab('packet',this)"><span class="tab-icon">📦</span>Packet</button>
+    <button class="tab"        data-sec="attack"    onclick="switchTab('attack',this)"><span class="tab-icon">⚔️</span>การโจมตี</button>
+    <button class="tab"        data-sec="encrypt"   onclick="switchTab('encrypt',this)"><span class="tab-icon">🔐</span>เข้ารหัส</button>
+    <button class="tab"        data-sec="netdesign" onclick="switchTab('netdesign',this)"><span class="tab-icon">🏗️</span>เครือข่าย</button>
+    <button class="tab"        data-sec="printer"   onclick="switchTab('printer',this)"><span class="tab-icon">🖨️</span>Printer Share</button>
+    <button class="tab"        data-sec="ipconfig"  onclick="switchTab('ipconfig',this)"><span class="tab-icon">🔧</span>IP Config</button>
+    <button class="tab"        data-sec="quiz"      onclick="switchTab('quiz',this)"><span class="tab-icon">📝</span>ทดสอบ</button>
+  </div>
+
+  <!-- ═══════════ OSI MODEL ═══════════ -->
+  <div id="sec-osi" class="section active">
+    <div class="card">
+      <div class="card-title"><div class="card-accent" style="background:var(--osi-accent)"></div>OSI Model 7 ชั้น (Open Systems Interconnection)</div>
+      <p class="card-desc">คลิกที่แต่ละชั้นเพื่อดูรายละเอียดและโปรโตคอลที่เกี่ยวข้อง</p>
+      <div id="osi-layers"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="card-accent" style="background:var(--osi-accent)"></div>การส่งข้อมูลผ่าน OSI — Encapsulation</div>
+      <div style="overflow-x:auto">
+        <svg viewBox="0 0 660 200" style="min-width:500px;width:100%">
+          <defs><marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+          <rect x="20" y="20" width="130" height="160" rx="8" fill="#F0F6FF" stroke="#C5D8F8" stroke-width="1"/>
+          <text x="85" y="14" text-anchor="middle" font-size="11" fill="#4A6080" font-family="Sarabun,sans-serif" font-weight="700">ผู้ส่ง (Sender)</text>
+          <rect x="30" y="28" width="110" height="18" rx="5" fill="#EDE9FF"/><text x="85" y="40" text-anchor="middle" font-size="10" fill="#4C2E9E" font-family="Sarabun,sans-serif" font-weight="600">7. Application</text>
+          <rect x="30" y="50" width="110" height="18" rx="5" fill="#D6F5EC"/><text x="85" y="62" text-anchor="middle" font-size="10" fill="#0D6B52" font-family="Sarabun,sans-serif" font-weight="600">6. Presentation</text>
+          <rect x="30" y="72" width="110" height="18" rx="5" fill="#FFF3DA"/><text x="85" y="84" text-anchor="middle" font-size="10" fill="#7A4800" font-family="Sarabun,sans-serif" font-weight="600">5. Session</text>
+          <rect x="30" y="94" width="110" height="18" rx="5" fill="#D9ECFF"/><text x="85" y="106" text-anchor="middle" font-size="10" fill="#084F96" font-family="Sarabun,sans-serif" font-weight="600">4. Transport</text>
+          <rect x="30" y="116" width="110" height="18" rx="5" fill="#E4F5D4"/><text x="85" y="128" text-anchor="middle" font-size="10" fill="#2B5F10" font-family="Sarabun,sans-serif" font-weight="600">3. Network</text>
+          <rect x="30" y="138" width="110" height="18" rx="5" fill="#FFE8E8"/><text x="85" y="150" text-anchor="middle" font-size="10" fill="#8B1E1E" font-family="Sarabun,sans-serif" font-weight="600">2. Data Link</text>
+          <rect x="30" y="160" width="110" height="18" rx="5" fill="#F3EFE4"/><text x="85" y="172" text-anchor="middle" font-size="10" fill="#4A4338" font-family="Sarabun,sans-serif" font-weight="600">1. Physical</text>
+          <line x1="85" y1="46" x2="85" y2="50" stroke="#A0BDF0" stroke-width="1.5" marker-end="url(#a)"/>
+          <line x1="85" y1="68" x2="85" y2="72" stroke="#A0BDF0" stroke-width="1.5" marker-end="url(#a)"/>
+          <line x1="85" y1="90" x2="85" y2="94" stroke="#A0BDF0" stroke-width="1.5" marker-end="url(#a)"/>
+          <line x1="85" y1="112" x2="85" y2="116" stroke="#A0BDF0" stroke-width="1.5" marker-end="url(#a)"/>
+          <line x1="85" y1="134" x2="85" y2="138" stroke="#A0BDF0" stroke-width="1.5" marker-end="url(#a)"/>
+          <line x1="85" y1="156" x2="85" y2="160" stroke="#A0BDF0" stroke-width="1.5" marker-end="url(#a)"/>
+          <line x1="155" y1="169" x2="500" y2="169" stroke="#A0BDF0" stroke-width="2"/>
+          <text x="328" y="186" text-anchor="middle" font-size="11" fill="#4A6080" font-family="Sarabun,sans-serif" font-weight="600">สื่อกลาง (Physical Medium)</text>
+          <rect x="510" y="20" width="130" height="160" rx="8" fill="#F0F6FF" stroke="#C5D8F8" stroke-width="1"/>
+          <text x="575" y="14" text-anchor="middle" font-size="11" fill="#4A6080" font-family="Sarabun,sans-serif" font-weight="700">ผู้รับ (Receiver)</text>
+          <rect x="520" y="28" width="110" height="18" rx="5" fill="#EDE9FF"/><text x="575" y="40" text-anchor="middle" font-size="10" fill="#4C2E9E" font-family="Sarabun,sans-serif" font-weight="600">7. Application</text>
+          <rect x="520" y="50" width="110" height="18" rx="5" fill="#D6F5EC"/><text x="575" y="62" text-anchor="middle" font-size="10" fill="#0D6B52" font-family="Sarabun,sans-serif" font-weight="600">6. Presentation</text>
+          <rect x="520" y="72" width="110" height="18" rx="5" fill="#FFF3DA"/><text x="575" y="84" text-anchor="middle" font-size="10" fill="#7A4800" font-family="Sarabun,sans-serif" font-weight="600">5. Session</text>
+          <rect x="520" y="94" width="110" height="18" rx="5" fill="#D9ECFF"/><text x="575" y="106" text-anchor="middle" font-size="10" fill="#084F96" font-family="Sarabun,sans-serif" font-weight="600">4. Transport</text>
+          <rect x="520" y="116" width="110" height="18" rx="5" fill="#E4F5D4"/><text x="575" y="128" text-anchor="middle" font-size="10" fill="#2B5F10" font-family="Sarabun,sans-serif" font-weight="600">3. Network</text>
+          <rect x="520" y="138" width="110" height="18" rx="5" fill="#FFE8E8"/><text x="575" y="150" text-anchor="middle" font-size="10" fill="#8B1E1E" font-family="Sarabun,sans-serif" font-weight="600">2. Data Link</text>
+          <rect x="520" y="160" width="110" height="18" rx="5" fill="#F3EFE4"/><text x="575" y="172" text-anchor="middle" font-size="10" fill="#4A4338" font-family="Sarabun,sans-serif" font-weight="600">1. Physical</text>
+          <line x1="575" y1="160" x2="575" y2="156" stroke="#A0BDF0" stroke-width="1.5" marker-end="url(#a)"/>
+          <line x1="575" y1="138" x2="575" y2="134" stroke="#A0BDF0" stroke-width="1.5" marker-end="url(#a)"/>
+          <line x1="575" y1="116" x2="575" y2="112" stroke="#A0BDF0" stroke-width="1.5" marker-end="url(#a)"/>
+          <line x1="575" y1="94" x2="575" y2="90" stroke="#A0BDF0" stroke-width="1.5" marker-end="url(#a)"/>
+          <line x1="575" y1="72" x2="575" y2="68" stroke="#A0BDF0" stroke-width="1.5" marker-end="url(#a)"/>
+          <line x1="575" y1="50" x2="575" y2="46" stroke="#A0BDF0" stroke-width="1.5" marker-end="url(#a)"/>
+          <text x="308" y="68" text-anchor="middle" font-size="12" fill="#4A6FE3" font-family="Sarabun,sans-serif" font-weight="700">Encapsulation ↓</text>
+          <text x="308" y="120" text-anchor="middle" font-size="12" fill="#0D9E6E" font-family="Sarabun,sans-serif" font-weight="700">De-encapsulation ↑</text>
+        </svg>
+      </div>
+    </div>
+    <div class="osi-activity-section">
+      <div class="activity-title">🎯 กิจกรรม: จับคู่ชื่อเลเยอร์กับหน้าที่</div>
+      <div class="activity-desc">ลากกล่องชื่อเลเยอร์ (ด้านบน) ไปวางให้ตรงกับคำอธิบายหน้าที่แต่ละชั้น — กด ✓ ตรวจคำตอบ</div>
+      <div class="answer-pool" id="chip-pool"></div>
+      <div class="osi-fill-rows" id="osi-fill-rows"></div>
+      <div class="activity-controls">
+        <button class="btn btn-primary" onclick="checkOSIActivity()">✓ ตรวจคำตอบ</button>
+        <button class="btn" onclick="resetOSIActivity()">↺ รีเซต</button>
+        <div class="activity-score" id="osi-act-score"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ PACKET ═══════════ -->
+  <div id="sec-packet" class="section">
+    <div class="card">
+      <div class="card-title"><div class="card-accent" style="background:var(--packet-accent)"></div>โครงสร้าง TCP/IP Packet</div>
+      <p class="card-desc">คลิกที่แต่ละชั้นเพื่อดูรายละเอียด Header Fields</p>
+      <div id="packet-layers"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="card-accent" style="background:var(--packet-accent)"></div>เปรียบเทียบ TCP vs UDP</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:.5rem">
+        <div style="background:#EEF9F4;border:1.5px solid #A7E0C8;border-radius:10px;padding:14px">
+          <div style="font-size:15px;font-weight:700;color:#0D6B52;margin-bottom:8px">TCP — Transmission Control Protocol</div>
+          <div style="font-size:13px;color:var(--txt2);line-height:2">
+            <span class="badge badge-success">Connection-oriented</span><br>
+            ✅ มีการยืนยันการรับข้อมูล (ACK)<br>
+            ✅ ส่งข้อมูลซ้ำเมื่อสูญหาย<br>
+            ✅ จัดลำดับ Packet<br>
+            ✅ ควบคุมการไหล (Flow Control)<br>
+            ❌ ช้ากว่า UDP<br>
+            📌 ใช้กับ: HTTP, FTP, Email
+          </div>
+        </div>
+        <div style="background:#FFFBEB;border:1.5px solid #FCD34D;border-radius:10px;padding:14px">
+          <div style="font-size:15px;font-weight:700;color:#92400E;margin-bottom:8px">UDP — User Datagram Protocol</div>
+          <div style="font-size:13px;color:var(--txt2);line-height:2">
+            <span class="badge badge-warn">Connectionless</span><br>
+            ❌ ไม่มีการยืนยัน<br>
+            ❌ ไม่ส่งซ้ำ<br>
+            ❌ ไม่จัดลำดับ<br>
+            ✅ เร็วกว่า<br>
+            ✅ Overhead น้อย<br>
+            📌 ใช้กับ: DNS, Video Streaming, VoIP
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ ATTACK ═══════════ -->
+  <div id="sec-attack" class="section">
+    <div class="card">
+      <div class="card-title"><div class="card-accent" style="background:var(--attack-accent)"></div>เลือกประเภทการโจมตีระบบเครือข่าย</div>
+      <div class="attack-grid" id="attack-grid"></div>
+      <div style="margin-bottom:.75rem;display:flex;gap:8px">
+        <button class="btn btn-danger" onclick="runAttack()">▶ จำลองการโจมตี</button>
+        <button class="btn" onclick="clearLog()">ล้าง Log</button>
+      </div>
+      <div class="log-box" id="attack-log"><div style="color:#8b949e">// เลือกประเภทการโจมตีและกด "จำลองการโจมตี"</div></div>
+    </div>
+    <div class="card" id="attack-info" style="display:none">
+      <div class="card-title" id="ai-title"></div>
+      <div id="ai-body" style="font-size:14px;color:var(--txt2);line-height:1.7"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════ ENCRYPTION ═══════════ -->
+  <div id="sec-encrypt" class="section">
+    <div class="card">
+      <div class="card-title"><div class="card-accent" style="background:var(--encrypt-accent)"></div>ทดลองการเข้ารหัสข้อมูล</div>
+      <div style="margin-bottom:1rem">
+        <label style="font-size:14px;color:var(--txt2);display:block;margin-bottom:6px;font-weight:600">ข้อความต้นฉบับ (Plaintext)</label>
+        <input class="enc-input" id="plain-input" value="Hello Network" oninput="updateEncryption()" placeholder="พิมพ์ข้อความ...">
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap">
+        <button class="btn" id="btn-caesar" onclick="setMethod('caesar')">Caesar Cipher</button>
+        <button class="btn" id="btn-b64" onclick="setMethod('base64')">Base64</button>
+        <button class="btn" id="btn-hash" onclick="setMethod('hash')">Hash (SHA-like)</button>
+        <button class="btn" id="btn-xor" onclick="setMethod('xor')">XOR</button>
+      </div>
+      <div id="method-desc" style="font-size:13px;color:var(--txt2);background:var(--bg-muted);border-radius:9px;padding:10px 14px;margin-bottom:1rem;line-height:1.6;border-left:3px solid var(--encrypt-accent)"></div>
+      <div style="display:flex;gap:1rem;align-items:flex-start;flex-wrap:wrap">
+        <div style="flex:1;min-width:180px">
+          <div style="font-size:12px;color:var(--txt2);margin-bottom:4px;font-weight:600">Plaintext</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--txt);background:var(--bg-muted);padding:10px 12px;border-radius:8px;word-break:break-all;border:1px solid var(--border)" id="show-plain">Hello Network</div>
+        </div>
+        <div style="padding-top:22px;font-size:24px;color:var(--encrypt-accent)">→</div>
+        <div style="flex:1;min-width:180px">
+          <div style="font-size:12px;color:var(--txt2);margin-bottom:4px;font-weight:600">Ciphertext / Output</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--success-txt);background:var(--success-bg);padding:10px 12px;border-radius:8px;word-break:break-all;border:1px solid #A7E0C8" id="show-cipher">—</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="card-accent" style="background:var(--encrypt-accent)"></div>เปรียบเทียบการเข้ารหัสแบบต่างๆ</div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead><tr style="border-bottom:2px solid var(--border)">
+            <th style="text-align:left;padding:10px;font-weight:700;color:var(--txt)">ประเภท</th>
+            <th style="text-align:left;padding:10px;font-weight:700;color:var(--txt)">ชื่อ</th>
+            <th style="text-align:left;padding:10px;font-weight:700;color:var(--txt)">Key</th>
+            <th style="text-align:left;padding:10px;font-weight:700;color:var(--txt)">ตัวอย่างใช้งาน</th>
+          </tr></thead>
+          <tbody id="enc-table"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ NETWORK DESIGN ═══════════ -->
+  <div id="sec-netdesign" class="section">
+    <div class="challenge-panel" id="challenge-panel">
+      <div class="challenge-title" id="chal-title">📋 กำลังโหลดโจทย์...</div>
+      <div class="challenge-desc" id="chal-desc"></div>
+      <ul class="requirement-list" id="chal-reqs"></ul>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap">
+        <button class="tool-btn" onclick="prevChallenge()">← ก่อน</button>
+        <span style="font-size:13px;color:var(--txt2)" id="chal-idx"></span>
+        <button class="tool-btn" onclick="nextChallenge()">ถัดไป →</button>
+        <button class="btn btn-primary" onclick="verifyDesign()" style="margin-left:auto;padding:8px 16px;font-size:13px">✓ ตรวจคำตอบ</button>
+      </div>
+      <div class="verify-result" id="verify-result"></div>
+    </div>
+    <div class="design-toolbar">
+      <button class="tool-btn active" id="tool-select" onclick="setTool('select')">🖱 เลือก</button>
+      <button class="tool-btn" id="tool-connect" onclick="setTool('connect')">🔗 เชื่อมต่อ</button>
+      <button class="tool-btn" onclick="clearCanvas()">🗑 ล้าง</button>
+      <button class="tool-btn" onclick="undoLast()">↩ เลิกทำ</button>
+      <span style="font-size:12px;color:var(--txt2);margin-left:auto">โหมด: <strong id="tool-mode-label">เลือก/ย้าย</strong></span>
+    </div>
+    <div class="net-design-wrapper">
+      <div class="device-palette">
+        <div class="palette-title">📦 อุปกรณ์เครือข่าย</div>
+        <div id="device-palette"></div>
+      </div>
+      <div style="display:flex;flex-direction:column">
+        <div class="canvas-area" id="net-canvas" ondragover="canvasDragOver(event)" ondrop="canvasDrop(event)" ondragleave="canvasDragLeave(event)">
+          <svg class="canvas-svg" id="canvas-svg"></svg>
+          <div class="mode-indicator" id="mode-indicator">🖱 โหมด: เลือก/ย้าย</div>
+        </div>
+        <div class="net-info-bar">
+          <span>อุปกรณ์: <strong id="info-devices">0</strong></span>
+          <span>การเชื่อมต่อ: <strong id="info-connections">0</strong></span>
+          <span style="margin-left:auto;font-style:italic" id="info-hint">ลากอุปกรณ์จากแผงซ้ายมาวางบน Canvas</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ PRINTER SHARE ═══════════ -->
+  <div id="sec-printer" class="section">
+    <div class="card">
+      <div class="card-title"><div class="card-accent" style="background:var(--printer-accent)"></div>จำลองการแชร์เครื่องพิมพ์ (Printer Sharing)</div>
+      <p class="card-desc">จำลองการตั้งค่าแชร์เครื่องพิมพ์ใน Windows Network เลือกเครื่องที่ต้องการพิมพ์แล้วกด "ส่งงานพิมพ์"</p>
+      <!-- Network visual -->
+      <div style="background:#F8FAFF;border:1.5px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1rem">
+        <div style="font-size:13px;font-weight:700;color:var(--txt2);margin-bottom:1rem">🖧 เครือข่าย LAN — กลุ่มงาน (Workgroup: OFFICE)</div>
+        <div class="net-row">
+          <div class="pc-box has-printer" id="pc-host">
+            <div class="pc-icon">🖥️</div>
+            <div class="pc-label">PC-Host</div>
+            <div class="pc-ip">192.168.1.10</div>
+            <div style="margin-top:6px;font-size:11px;background:#7C3AED;color:#fff;border-radius:6px;padding:2px 6px">มีเครื่องพิมพ์</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+            <div style="font-size:11px;color:var(--txt3)">Switch/Hub</div>
+            <div style="font-size:28px">🔀</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div class="pc-box" id="pc-client1" onclick="selectClient('pc-client1')">
+              <div class="pc-icon">💻</div>
+              <div class="pc-label">PC-Client1</div>
+              <div class="pc-ip">192.168.1.11</div>
+            </div>
+            <div class="pc-box" id="pc-client2" onclick="selectClient('pc-client2')">
+              <div class="pc-icon">🖥️</div>
+              <div class="pc-label">PC-Client2</div>
+              <div class="pc-ip">192.168.1.12</div>
+            </div>
+            <div class="pc-box" id="pc-client3" onclick="selectClient('pc-client3')">
+              <div class="pc-icon">💻</div>
+              <div class="pc-label">PC-Client3</div>
+              <div class="pc-ip">192.168.1.13</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+            <div class="printer-box">
+              <div class="pc-icon">🖨️</div>
+              <div class="pc-label">HP LaserJet</div>
+              <div class="pc-ip">\\PC-Host\Printer</div>
+              <div id="printer-status" style="margin-top:6px;font-size:11px;background:#D4F7E7;color:#0A6B46;border-radius:6px;padding:2px 8px">พร้อมใช้งาน</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1rem">
+        <div>
+          <label style="font-size:13px;font-weight:600;color:var(--txt2);display:block;margin-bottom:6px">เครื่องที่จะส่งงานพิมพ์</label>
+          <select id="printer-client-select" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:'Sarabun',sans-serif;background:var(--bg-card);color:var(--txt);outline:none;">
+            <option value="client1">PC-Client1 (192.168.1.11)</option>
+            <option value="client2">PC-Client2 (192.168.1.12)</option>
+            <option value="client3">PC-Client3 (192.168.1.13)</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:13px;font-weight:600;color:var(--txt2);display:block;margin-bottom:6px">เอกสาร / ไฟล์</label>
+          <select id="printer-doc-select" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:'Sarabun',sans-serif;background:var(--bg-card);color:var(--txt);outline:none;">
+            <option value="report">รายงาน_ภาคเรียน1.pdf (2 หน้า)</option>
+            <option value="excel">ตารางสรุป.xlsx (1 หน้า)</option>
+            <option value="word">แบบฝึกหัดเครือข่าย.docx (5 หน้า)</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem">
+        <button class="btn btn-purple" onclick="runPrinterShare()">🖨️ ส่งงานพิมพ์</button>
+        <button class="btn" onclick="setupPrinterShare()">⚙️ จำลองการตั้งค่า Sharing</button>
+        <button class="btn" onclick="clearPrintLog()">ล้าง Log</button>
+      </div>
+      <div class="print-job-area" id="print-log"><span style="color:#8b949e">// เลือกเครื่องและกด "ส่งงานพิมพ์"</span></div>
+    </div>
+
+    <!-- Step-by-step guide -->
+    <div class="card">
+      <div class="card-title"><div class="card-accent" style="background:var(--printer-accent)"></div>📋 ขั้นตอนการตั้งค่า Printer Sharing ใน Windows</div>
+      <ul class="steps-list" id="printer-steps">
+        <li>เปิด <strong>Control Panel</strong> → <strong>Network and Sharing Center</strong></li>
+        <li>คลิก <strong>Change advanced sharing settings</strong> และเปิด <strong>File and Printer Sharing</strong></li>
+        <li>ไปที่ <strong>Devices and Printers</strong> → คลิกขวาเครื่องพิมพ์ → <strong>Printer Properties</strong></li>
+        <li>ไปที่แท็บ <strong>Sharing</strong> → ติ๊ก <strong>Share this printer</strong> → ตั้งชื่อ Share Name</li>
+        <li>บนเครื่อง Client: เปิด <strong>File Explorer</strong> → พิมพ์ <code>\\PC-Host</code> ใน Address Bar</li>
+        <li>คลิกขวาเครื่องพิมพ์ที่เห็น → <strong>Connect</strong> → รอติดตั้ง Driver อัตโนมัติ</li>
+        <li>ทดสอบพิมพ์จากแอปพลิเคชัน → เลือกเครื่องพิมพ์ที่เพิ่งเพิ่ม</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="card-accent" style="background:var(--printer-accent)"></div>🔍 ปัญหาที่พบบ่อยและวิธีแก้ไข</div>
+      <div style="display:grid;gap:8px">
+        <div style="background:#FFF3DA;border:1px solid #FCD34D;border-radius:8px;padding:12px">
+          <div style="font-size:14px;font-weight:700;color:#92400E;margin-bottom:4px">⚠️ ไม่เห็นเครื่องพิมพ์ที่แชร์</div>
+          <div style="font-size:13px;color:var(--txt2)">แก้ไข: ตรวจสอบว่า Firewall อนุญาต File and Printer Sharing, ทั้ง 2 เครื่องต้องอยู่ใน Workgroup เดียวกัน, และเปิด Network Discovery</div>
+        </div>
+        <div style="background:#FFE4E4;border:1px solid #FCA5A5;border-radius:8px;padding:12px">
+          <div style="font-size:14px;font-weight:700;color:#991B1B;margin-bottom:4px">❌ Access Denied เมื่อเชื่อมต่อ</div>
+          <div style="font-size:13px;color:var(--txt2)">แก้ไข: ใส่ Username/Password ของเครื่อง Host, หรือเพิ่ม Guest account, ตรวจสอบ Share Permission และ Security Permission</div>
+        </div>
+        <div style="background:#D4F7E7;border:1px solid #6EE7B7;border-radius:8px;padding:12px">
+          <div style="font-size:14px;font-weight:700;color:#0A6B46;margin-bottom:4px">✅ วิธีป้องกันปัญหา</div>
+          <div style="font-size:13px;color:var(--txt2)">กำหนดสิทธิ์เฉพาะ User ที่จำเป็น, ใช้ Static IP สำหรับ Host, เปิด Windows Update ให้ Driver ทันสมัย</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ IP CONFIG ═══════════ -->
+  <div id="sec-ipconfig" class="section">
+    <div class="card">
+      <div class="card-title"><div class="card-accent" style="background:var(--ipconfig-accent)"></div>🔧 จำลองการตั้งค่า IP Address</div>
+      <p class="card-desc">กรอก IP Address, Subnet Mask และ Default Gateway — ระบบจะวิเคราะห์ความถูกต้องและแสดงข้อมูลเครือข่ายให้อัตโนมัติ</p>
+      <div class="ip-form">
+        <div class="ip-row">
+          <div class="ip-label">IP Address</div>
+          <div>
+            <input class="ip-input" id="ip-addr" value="192.168.1.100" oninput="analyzeIP()" placeholder="เช่น 192.168.1.100">
+            <div class="ip-hint">รูปแบบ: 0-255.0-255.0-255.0-255</div>
+          </div>
+        </div>
+        <div class="ip-row">
+          <div class="ip-label">Subnet Mask</div>
+          <div>
+            <input class="ip-input" id="ip-mask" value="255.255.255.0" oninput="analyzeIP()" placeholder="เช่น 255.255.255.0">
+            <div class="ip-hint">Class C ทั่วไป: 255.255.255.0</div>
+          </div>
+        </div>
+        <div class="ip-row">
+          <div class="ip-label">Default Gateway</div>
+          <div>
+            <input class="ip-input" id="ip-gw" value="192.168.1.1" oninput="analyzeIP()" placeholder="เช่น 192.168.1.1">
+            <div class="ip-hint">IP ของ Router ในเครือข่าย</div>
+          </div>
+        </div>
+        <div class="ip-row">
+          <div class="ip-label">DNS Server</div>
+          <div>
+            <input class="ip-input" id="ip-dns" value="8.8.8.8" oninput="analyzeIP()" placeholder="เช่น 8.8.8.8">
+            <div class="ip-hint">Google DNS: 8.8.8.8 | Cloudflare: 1.1.1.1</div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:1rem" id="ip-result-area"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="card-accent" style="background:var(--ipconfig-accent)"></div>🧪 จำลอง Ping Test</div>
+      <p class="card-desc">ทดสอบการเชื่อมต่อระหว่างอุปกรณ์ในเครือข่าย</p>
+      <div id="ip-visual" class="ip-visual"></div>
+      <div style="display:flex;gap:8px;margin-bottom:.75rem;flex-wrap:wrap">
+        <input class="ip-input" id="ping-target" value="192.168.1.1" placeholder="IP ที่ต้องการ Ping" style="max-width:220px">
+        <button class="btn btn-green" onclick="runPing()">▶ Ping</button>
+        <button class="btn" onclick="document.getElementById('ping-output').innerHTML='<span style=color:#8b949e>// ล้างผลลัพธ์</span>'">ล้าง</button>
+      </div>
+      <div class="ping-result" id="ping-output"><span style="color:#8b949e">// กรอก IP ที่ต้องการ Ping แล้วกด ▶</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="card-accent" style="background:var(--ipconfig-accent)"></div>📚 สถานการณ์ตัวอย่าง IP Classes</div>
+      <div id="ip-scenarios"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="card-accent" style="background:var(--ipconfig-accent)"></div>📋 ขั้นตอนการตั้งค่า Static IP ใน Windows</div>
+      <ul class="steps-list">
+        <li>คลิกขวา <strong>Start</strong> → <strong>Network Connections</strong> (หรือ Settings → Network)</li>
+        <li>คลิกขวาที่ <strong>Ethernet / Wi-Fi</strong> → <strong>Properties</strong></li>
+        <li>เลือก <strong>Internet Protocol Version 4 (TCP/IPv4)</strong> → คลิก <strong>Properties</strong></li>
+        <li>เลือก <strong>Use the following IP address</strong> แล้วกรอก IP, Subnet Mask, Gateway</li>
+        <li>กรอก DNS Server (แนะนำ 8.8.8.8 หรือ IP ของ DNS ภายใน)</li>
+        <li>กด <strong>OK</strong> → ทดสอบด้วย Command Prompt: พิมพ์ <code>ipconfig</code> และ <code>ping 8.8.8.8</code></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══════════ QUIZ ═══════════ -->
+  <div id="sec-quiz" class="section">
+    <div class="card">
+      <div id="quiz-area">
+        <div class="progress-bar"><div class="progress-fill" id="q-prog"></div></div>
+        <div style="font-size:13px;color:var(--txt2);margin-bottom:1rem;display:flex;justify-content:space-between" id="q-counter">
+          <span>คำถามที่ 1 / 12</span><span id="q-score-inline">คะแนน: 0/0</span>
+        </div>
+        <div class="quiz-q" id="q-text"></div>
+        <div class="quiz-opts" id="q-opts"></div>
+        <div class="quiz-feedback" id="q-feedback"></div>
+        <div style="display:flex;justify-content:flex-end;margin-top:1rem">
+          <button class="btn btn-primary" id="q-next" onclick="nextQuestion()" style="display:none">คำถามถัดไป →</button>
+        </div>
+      </div>
+      <div id="quiz-result" style="display:none;text-align:center;padding:1rem 0">
+        <div style="font-size:18px;font-weight:700;color:var(--txt);margin-bottom:.5rem">🏁 ผลการทดสอบ</div>
+        <div style="display:flex;justify-content:center;margin:1rem 0">
+          <div class="score-ring">
+            <svg width="84" height="84" viewBox="0 0 84 84">
+              <circle cx="42" cy="42" r="34" fill="none" stroke="#E2E8F0" stroke-width="6"/>
+              <circle cx="42" cy="42" r="34" fill="none" stroke="#D97706" stroke-width="6" stroke-dasharray="214" id="score-arc" stroke-dashoffset="214" stroke-linecap="round"/>
+            </svg>
+            <div class="score-num" id="score-pct"></div>
+          </div>
+        </div>
+        <div class="result-grid" id="result-grid"></div>
+        <button class="btn btn-warn" onclick="restartQuiz()" style="margin-top:1rem">ทำแบบทดสอบอีกครั้ง ↺</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /.app -->
+
+<script>
+// ════ DATA ════
+const osiData=[
+  {num:7,name:"Application",th:"ชั้นแอปพลิเคชัน",color:"#EDE9FF",tc:"#4C2E9E",proto:"HTTP, FTP, SMTP, DNS",detail:"ชั้นที่ใกล้ชิดกับผู้ใช้มากที่สุด รับผิดชอบการสื่อสารระหว่างแอปพลิเคชัน เช่น เว็บเบราว์เซอร์ อีเมล และการถ่ายโอนไฟล์"},
+  {num:6,name:"Presentation",th:"ชั้นนำเสนอ",color:"#D6F5EC",tc:"#0D6B52",proto:"SSL/TLS, JPEG, ASCII",detail:"แปลงรูปแบบข้อมูล เข้ารหัส/ถอดรหัส (Encryption/Decryption) และบีบอัดข้อมูล (Compression) เพื่อให้ระบบต่างๆ เข้าใจกันได้"},
+  {num:5,name:"Session",th:"ชั้นเซสชัน",color:"#FFF3DA",tc:"#7A4800",proto:"NetBIOS, RPC",detail:"สร้าง จัดการ และยุติการเชื่อมต่อ (Session) ระหว่างแอปพลิเคชัน ควบคุมการสนทนาแบบ Duplex"},
+  {num:4,name:"Transport",th:"ชั้นขนส่ง",color:"#D9ECFF",tc:"#084F96",proto:"TCP, UDP",detail:"รับผิดชอบการส่งข้อมูลแบบ End-to-End แบ่งข้อมูลเป็น Segment ควบคุม Error และ Flow Control ใช้ Port Number ระบุบริการ"},
+  {num:3,name:"Network",th:"ชั้นเครือข่าย",color:"#E4F5D4",tc:"#2B5F10",proto:"IP, ICMP, ARP",detail:"จัดการการกำหนด IP Address และเส้นทาง (Routing) ของ Packet ผ่านเครือข่าย หน่วยข้อมูลเรียกว่า Packet"},
+  {num:2,name:"Data Link",th:"ชั้นเชื่อมข้อมูล",color:"#FFE8E8",tc:"#8B1E1E",proto:"Ethernet, Wi-Fi, MAC",detail:"ควบคุมการส่งข้อมูลระหว่างอุปกรณ์ที่เชื่อมต่อโดยตรง ใช้ MAC Address หน่วยข้อมูลเรียกว่า Frame ตรวจจับและแก้ไขข้อผิดพลาด"},
+  {num:1,name:"Physical",th:"ชั้นกายภาพ",color:"#F3EFE4",tc:"#4A4338",proto:"Ethernet cable, Wi-Fi, Fiber",detail:"จัดการสัญญาณไฟฟ้า แสง หรือคลื่นวิทยุ บนสื่อกลาง เช่น สายทองแดง ใยแก้วนำแสง หรือ Wi-Fi หน่วยข้อมูลเรียกว่า Bit"},
+];
+const osiActivity=[
+  {num:7,hint:"ชั้นที่ใกล้ผู้ใช้มากที่สุด — เช่น เว็บเบราว์เซอร์, อีเมล",answer:"Application",color:"#EDE9FF",tc:"#4C2E9E"},
+  {num:6,hint:"แปลงรูปแบบข้อมูล, เข้ารหัส/ถอดรหัส, บีบอัดข้อมูล",answer:"Presentation",color:"#D6F5EC",tc:"#0D6B52"},
+  {num:5,hint:"สร้างและจัดการ Session ระหว่างแอปพลิเคชัน",answer:"Session",color:"#FFF3DA",tc:"#7A4800"},
+  {num:4,hint:"ส่งข้อมูล End-to-End, ใช้ TCP/UDP, Port Number",answer:"Transport",color:"#D9ECFF",tc:"#084F96"},
+  {num:3,hint:"กำหนด IP Address และ Routing ของ Packet",answer:"Network",color:"#E4F5D4",tc:"#2B5F10"},
+  {num:2,hint:"ส่งข้อมูลระหว่างอุปกรณ์ใกล้ๆ โดยใช้ MAC Address",answer:"Data Link",color:"#FFE8E8",tc:"#8B1E1E"},
+  {num:1,hint:"ส่งสัญญาณไฟฟ้า/แสง/คลื่นวิทยุ ผ่านสื่อกลาง",answer:"Physical",color:"#F3EFE4",tc:"#4A4338"},
+];
+const packetData=[
+  {name:"Application Layer",color:"#EDE9FF",tc:"#4C2E9E",pdu:"Data",fields:[["ข้อมูลจากแอปพลิเคชัน","GET /index.html HTTP/1.1"],["Content-Type","text/html"],["Host","www.example.com"]]},
+  {name:"Transport Layer (TCP Header)",color:"#D9ECFF",tc:"#084F96",pdu:"Segment",fields:[["Source Port","49512"],["Destination Port","80 (HTTP)"],["Sequence Number","0x1A2B3C4D"],["ACK Number","0x5E6F7A8B"],["Flags","SYN, ACK"],["Window Size","65535"]]},
+  {name:"Network Layer (IP Header)",color:"#E4F5D4",tc:"#2B5F10",pdu:"Packet",fields:[["Version","IPv4"],["Source IP","192.168.1.100"],["Destination IP","93.184.216.34"],["TTL","64"],["Protocol","6 (TCP)"]]},
+  {name:"Data Link Layer (Ethernet Frame)",color:"#FFE8E8",tc:"#8B1E1E",pdu:"Frame",fields:[["Source MAC","AA:BB:CC:DD:EE:FF"],["Destination MAC","11:22:33:44:55:66"],["EtherType","0x0800 (IPv4)"],["FCS","CRC Checksum"]]},
+];
+const attacks=[
+  {id:"ddos",name:"DDoS Attack",sub:"ทำให้เซิร์ฟเวอร์ล่ม",icon:"⚡",info:"DDoS (Distributed Denial-of-Service) คือการส่ง Request จำนวนมหาศาลจากหลายแหล่งพร้อมกัน เพื่อทำให้ทรัพยากรของเซิร์ฟเวอร์หมด ไม่สามารถให้บริการได้",defense:"ป้องกันด้วย: Rate Limiting, CDN, Firewall Rules, Traffic Scrubbing",logs:[{t:"WARN",m:"[192.168.1.101] SYN flood detected — 10,000 req/s"},{t:"WARN",m:"[10.0.0.254] UDP amplification attack detected"},{t:"DANGER",m:"Server CPU 98% — bandwidth exhausted"},{t:"DANGER",m:"Connection timeout on port 80, 443"},{t:"OK",m:"Firewall: Rate limit applied — blocking IPs"},{t:"OK",m:"DDoS mitigation activated — traffic scrubbing"}]},
+  {id:"mitm",name:"Man-in-the-Middle",sub:"ดักฟังข้อมูล",icon:"👁",info:"MITM Attack คือการที่ผู้โจมตีแทรกตัวอยู่ระหว่างการสื่อสาร 2 ฝ่าย เพื่อดักฟัง แก้ไข หรือขโมยข้อมูล เช่น ARP Poisoning บน Wi-Fi สาธารณะ",defense:"ป้องกันด้วย: HTTPS/TLS, Certificate Pinning, VPN, ตรวจสอบ Certificate",logs:[{t:"WARN",m:"ARP Reply from unknown MAC: 192.168.1.1 → AA:BB:CC:11:22:33"},{t:"WARN",m:"ARP cache poisoned — gateway redirected"},{t:"DANGER",m:"Intercepting packets: 192.168.1.50 ↔ 192.168.1.1"},{t:"DANGER",m:"HTTP credentials captured: user=admin pass=1234"},{t:"OK",m:"HTTPS detected — encrypted, cannot read payload"},{t:"OK",m:"Certificate mismatch alert sent to client"}]},
+  {id:"sqli",name:"SQL Injection",sub:"เจาะฐานข้อมูล",icon:"💉",info:"SQL Injection คือการแทรกคำสั่ง SQL ผ่านช่องรับข้อมูลของผู้ใช้ เพื่อควบคุมฐานข้อมูล เช่น ดูข้อมูลทั้งหมด ลบข้อมูล หรือข้ามการยืนยันตัวตน",defense:"ป้องกันด้วย: Prepared Statements, Input Validation, WAF, Least Privilege",logs:[{t:"WARN",m:"Input received: ' OR '1'='1"},{t:"DANGER",m:"Query executed: SELECT * FROM users WHERE id='' OR '1'='1'"},{t:"DANGER",m:"All 1,247 user records exposed!"},{t:"WARN",m:"Attempt: '; DROP TABLE users; --"},{t:"OK",m:"WAF blocked: SQL injection pattern detected"},{t:"OK",m:"Prepared statement used — injection neutralized"}]},
+  {id:"phishing",name:"Phishing",sub:"หลอกขโมยข้อมูล",icon:"🎣",info:"Phishing คือการหลอกลวงผู้ใช้ผ่านอีเมล SMS หรือเว็บไซต์ปลอม เพื่อให้กรอกข้อมูลสำคัญ เช่น รหัสผ่าน หมายเลขบัตรเครดิต",defense:"ป้องกันด้วย: ตรวจสอบ URL, 2FA, Security Awareness Training, Email Filtering",logs:[{t:"WARN",m:"Email from: security@bankk-th.com (suspicious domain)"},{t:"WARN",m:"Link: http://bankk-th.com/login (not HTTPS!)"},{t:"DANGER",m:"User clicked link — redirected to fake login page"},{t:"DANGER",m:"Credentials submitted to attacker server"},{t:"OK",m:"2FA required — attacker cannot complete login"},{t:"OK",m:"Email filter: domain flagged as phishing site"}]},
+];
+const encTable=[
+  ["Symmetric","AES-256","Key เดียวกัน","เข้ารหัสไฟล์, VPN, Disk Encryption"],
+  ["Symmetric","DES / 3DES","Key เดียวกัน","ระบบเก่า — ไม่แนะนำ"],
+  ["Asymmetric","RSA","Public/Private Key","HTTPS, Email, SSH"],
+  ["Asymmetric","ECC","Public/Private Key","TLS สมัยใหม่, Bitcoin"],
+  ["Hash","SHA-256","ไม่มี Key","รหัสผ่าน, Integrity Check"],
+  ["Hash","MD5","ไม่มี Key","ตรวจไฟล์ — ไม่ปลอดภัยแล้ว"],
+];
+const quizData=[
+  {q:"OSI Layer ใดที่รับผิดชอบการกำหนด IP Address และ Routing?",opts:["Data Link Layer","Network Layer","Transport Layer","Session Layer"],ans:1,ex:"Network Layer (ชั้น 3) รับผิดชอบการกำหนด IP Address และการหาเส้นทาง (Routing) โปรโตคอลหลักคือ IP, ICMP, ARP"},
+  {q:"โปรโตคอลใดรับประกันการส่งข้อมูลครบถ้วน และมีการยืนยัน (ACK)?",opts:["UDP","ICMP","TCP","ARP"],ans:2,ex:"TCP (Transmission Control Protocol) เป็น Connection-oriented มีการยืนยันการรับข้อมูล จัดลำดับ Packet และส่งซ้ำเมื่อสูญหาย"},
+  {q:"การโจมตีแบบ Man-in-the-Middle ป้องกันได้ดีที่สุดด้วยวิธีใด?",opts:["ใช้รหัสผ่านยาวขึ้น","เปลี่ยน MAC Address","ใช้ HTTPS/TLS และ VPN","ปิด Firewall"],ans:2,ex:"HTTPS/TLS เข้ารหัสข้อมูลระหว่างส่ง ทำให้ผู้โจมตีที่ดักฟังไม่สามารถอ่านเนื้อหาได้ VPN สร้าง Tunnel ที่ปลอดภัยเพิ่มเติม"},
+  {q:"Port 443 ใช้สำหรับโปรโตคอลใด?",opts:["FTP","HTTP","HTTPS","SSH"],ans:2,ex:"Port 443 คือ Default Port ของ HTTPS ซึ่งใช้ TLS/SSL ในการเข้ารหัสข้อมูลระหว่างเบราว์เซอร์และเว็บเซิร์ฟเวอร์"},
+  {q:"Firewall ทำงานในชั้นใดของ OSI Model เป็นหลัก?",opts:["Layer 1-2","Layer 3-4","Layer 5-6","Layer 7 เท่านั้น"],ans:1,ex:"Firewall ทั่วไปทำงานที่ Layer 3 และ 4 ตรวจสอบ IP Address และ Port Number Next-Gen Firewall ทำงานถึง Layer 7"},
+  {q:"SQL Injection ป้องกันได้ดีที่สุดด้วยวิธีใด?",opts:["ใช้ HTTPS","ใช้ Prepared Statements","ปิด Database Port","ใช้รหัสผ่านแข็งแกร่ง"],ans:1,ex:"Prepared Statements แยกโค้ด SQL กับข้อมูลจากผู้ใช้ ทำให้ไม่สามารถแทรก SQL อันตรายได้"},
+  {q:"MAC Address ทำงานอยู่ที่ OSI Layer ใด?",opts:["Layer 1 Physical","Layer 2 Data Link","Layer 3 Network","Layer 4 Transport"],ans:1,ex:"MAC Address ทำงานที่ Layer 2 Data Link ใช้ระบุอุปกรณ์ใน LAN มีขนาด 48 bit เขียนในรูป Hexadecimal"},
+  {q:"DNS ย่อมาจากอะไร และทำหน้าที่อะไร?",opts:["Digital Network Service","Domain Name System — แปลง Domain เป็น IP","Data Node System","Dynamic Network Setup"],ans:1,ex:"DNS (Domain Name System) แปลงชื่อโดเมน เช่น www.google.com ให้เป็น IP Address เพื่อให้คอมพิวเตอร์สื่อสารกันได้"},
+  {q:"IP Address Class C มี Range เท่าใด?",opts:["1.0.0.0 – 126.255.255.255","128.0.0.0 – 191.255.255.255","192.0.0.0 – 223.255.255.255","224.0.0.0 – 239.255.255.255"],ans:2,ex:"Class C: 192.0.0.0 – 223.255.255.255 เหมาะกับเครือข่ายขนาดเล็ก มี Host ได้สูงสุด 254 เครื่องต่อ Subnet"},
+  {q:"Subnet Mask 255.255.255.0 หมายความว่าอย่างไร?",opts:["มี 24 บิตสำหรับ Network","มี 8 บิตสำหรับ Network","มี Host ได้ 256 เครื่อง","เป็น Class B เท่านั้น"],ans:0,ex:"255.255.255.0 = /24 หมายความว่า 24 บิตแรกเป็น Network ID เหลือ 8 บิตสำหรับ Host ได้ 254 Host"},
+  {q:"การแชร์เครื่องพิมพ์ในเครือข่าย Windows ต้องตั้งค่าอะไรก่อน?",opts:["เปิด Bluetooth","เปิด File and Printer Sharing ใน Firewall","ติดตั้ง Virtual Machine","ปิด Windows Defender"],ans:1,ex:"ต้องเปิด File and Printer Sharing ใน Firewall Settings และ Network Sharing Center เพื่อให้เครื่องอื่นในเครือข่ายเข้าถึงเครื่องพิมพ์ได้"},
+  {q:"DDoS ต่างจาก DoS อย่างไร?",opts:["DDoS โจมตีด้วยไวรัส","DDoS ใช้แหล่งโจมตีหลายแหล่งพร้อมกัน","DDoS โจมตีฐานข้อมูลเท่านั้น","DDoS ช้ากว่า DoS"],ans:1,ex:"DoS มาจากแหล่งเดียว DDoS ใช้บอทเน็ตหรืออุปกรณ์หลายพันเครื่องโจมตีพร้อมกัน ทำให้ป้องกันยากกว่ามาก"},
+];
+const challenges=[
+  {title:"🏠 โจทย์ที่ 1: เครือข่ายบ้านพื้นฐาน",desc:"ออกแบบเครือข่ายภายในบ้านที่มีอุปกรณ์ครบถ้วน ให้ PC และ Smartphone เชื่อมต่ออินเทอร์เน็ตผ่าน Router ได้",reqs:[{text:"มี Router อย่างน้อย 1 ตัว",key:"router",min:1},{text:"มี PC อย่างน้อย 1 เครื่อง",key:"pc",min:1},{text:"มี Smartphone อย่างน้อย 1 เครื่อง",key:"smartphone",min:1},{text:"PC เชื่อมต่อกับ Router",key:"conn_pc_router"},{text:"Smartphone เชื่อมต่อกับ Router",key:"conn_smart_router"}]},
+  {title:"🏢 โจทย์ที่ 2: เครือข่ายสำนักงาน",desc:"ออกแบบ LAN สำนักงานที่มี PC หลายเครื่อง เชื่อมต่อผ่าน Switch แล้วออกอินเทอร์เน็ตผ่าน Router",reqs:[{text:"มี Router อย่างน้อย 1 ตัว",key:"router",min:1},{text:"มี Switch อย่างน้อย 1 ตัว",key:"switch",min:1},{text:"มี PC อย่างน้อย 3 เครื่อง",key:"pc",min:3},{text:"PC ทุกเครื่องเชื่อมต่อกับ Switch",key:"conn_pc_switch"},{text:"Switch เชื่อมต่อกับ Router",key:"conn_switch_router"}]},
+  {title:"🔒 โจทย์ที่ 3: เครือข่ายมีระบบความปลอดภัย",desc:"ออกแบบเครือข่ายที่มี Firewall ป้องกันระหว่างอินเทอร์เน็ตกับเครือข่ายภายใน พร้อม Server",reqs:[{text:"มี Router อย่างน้อย 1 ตัว",key:"router",min:1},{text:"มี Firewall อย่างน้อย 1 ตัว",key:"firewall",min:1},{text:"มี Switch อย่างน้อย 1 ตัว",key:"switch",min:1},{text:"มี Server อย่างน้อย 1 ตัว",key:"server",min:1},{text:"มี PC อย่างน้อย 2 เครื่อง",key:"pc",min:2},{text:"Router เชื่อมต่อกับ Firewall",key:"conn_router_fw"}]},
+];
+const deviceTypes=[
+  {id:"router",icon:"🌐",label:"Router",color:"#DBEAFE",desc:"เชื่อมต่อ 2 เครือข่าย, กำหนดเส้นทาง"},
+  {id:"switch",icon:"🔀",label:"Switch",color:"#D1FAE5",desc:"กระจายสัญญาณใน LAN"},
+  {id:"pc",icon:"🖥",label:"PC",color:"#FEF9C3",desc:"คอมพิวเตอร์ตั้งโต๊ะ"},
+  {id:"smartphone",icon:"📱",label:"Smartphone",color:"#FCE7F3",desc:"อุปกรณ์ไร้สาย"},
+  {id:"server",icon:"🗄",label:"Server",color:"#EDE9FF",desc:"ให้บริการข้อมูล/เว็บ"},
+  {id:"firewall",icon:"🛡",label:"Firewall",color:"#FEE2E2",desc:"ป้องกันเครือข่าย"},
+  {id:"hub",icon:"⭕",label:"Hub",color:"#F3F4F6",desc:"กระจายสัญญาณ (เก่า)"},
+  {id:"cloud",icon:"☁️",label:"Internet",color:"#E0F2FE",desc:"เครือข่ายอินเทอร์เน็ต"},
+  {id:"printer",icon:"🖨️",label:"Printer",color:"#F5F0FF",desc:"เครื่องพิมพ์แชร์"},
+];
+const ipScenarios=[
+  {title:"บ้าน / สำนักงานเล็ก (Class C)",ip:"192.168.1.100",mask:"255.255.255.0",gw:"192.168.1.1",dns:"8.8.8.8"},
+  {title:"องค์กรขนาดกลาง (Class B)",ip:"172.16.5.50",mask:"255.255.0.0",gw:"172.16.0.1",dns:"1.1.1.1"},
+  {title:"เครือข่ายขนาดใหญ่ (Class A)",ip:"10.0.0.50",mask:"255.0.0.0",gw:"10.0.0.1",dns:"8.8.8.8"},
+];
+
+// ════ STATE ════
+let currentMethod='caesar';
+let qIdx=0,qScore=0,qAnswered=false;
+let selectedAttack=null;
+let chipDragId=null,chipFromZone=null,dropZoneAnswers={};
+let nodes=[],connections=[],nodeIdCounter=0,selectedNode=null,connectFrom=null,currentTool='select';
+let currentChallenge=0,draggingDeviceType=null,history=[];
+
+// ════ INIT ════
+function init(){
+  renderOSI();renderPacket();renderAttackGrid();renderEncTable();
+  setMethod('caesar');loadQuiz();renderOSIActivity();
+  renderDevicePalette();renderChallenge();
+  analyzeIP();renderIPScenarios();
+}
+function switchTab(id,el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  el.classList.add('active');
+}
+
+// ════ OSI ════
+function renderOSI(){
+  document.getElementById('osi-layers').innerHTML=osiData.map((l,i)=>`
+    <div class="osi-layer" onclick="toggleOSI(${i})" style="background:${l.color}80">
+      <div class="osi-num" style="background:${l.color};color:${l.tc};border:1.5px solid ${l.tc}40">${l.num}</div>
+      <div class="osi-info">
+        <div class="osi-name">${l.name} — ${l.th}</div>
+        <div class="osi-desc">${l.proto}</div>
+      </div>
+      <div style="font-size:13px;color:${l.tc};transition:transform .2s" id="osi-arr-${i}">▸</div>
+    </div>
+    <div class="osi-detail" id="osi-det-${i}">${l.detail}</div>
+  `).join('');
+}
+function toggleOSI(i){
+  const det=document.getElementById('osi-det-'+i),arr=document.getElementById('osi-arr-'+i);
+  const open=det.classList.contains('show');
+  document.querySelectorAll('.osi-detail').forEach(d=>d.classList.remove('show'));
+  document.querySelectorAll('[id^="osi-arr-"]').forEach(a=>a.style.transform='');
+  if(!open){det.classList.add('show');arr.style.transform='rotate(90deg)';}
+}
+
+// ════ OSI Activity ════
+function renderOSIActivity(){
+  const shuffled=[...osiActivity.map(l=>l.answer)].sort(()=>Math.random()-.5);
+  dropZoneAnswers={};
+  document.getElementById('chip-pool').innerHTML=shuffled.map(name=>{
+    const l=osiActivity.find(x=>x.answer===name);
+    return `<div class="chip" id="chip-${name.replace(/\s/g,'-')}" draggable="true"
+      style="background:${l.color};color:${l.tc};border-color:${l.tc}40"
+      ondragstart="chipDragStart(event,'${name}',null)" ondragend="chipDragEnd(event)">${name}</div>`;
+  }).join('');
+  document.getElementById('osi-fill-rows').innerHTML=osiActivity.map((l,i)=>`
+    <div class="osi-fill-row">
+      <div class="layer-num-badge" style="background:${l.color};color:${l.tc}">${l.num}</div>
+      <div class="layer-hint">${l.hint}</div>
+      <div class="drop-zone" id="drop-${i}" ondragover="dropZoneDragOver(event,${i})" ondragleave="dropZoneDragLeave(event,${i})" ondrop="dropZoneDrop(event,${i})">วางที่นี่</div>
+    </div>
+  `).join('');
+}
+function chipDragStart(e,name,fromZone){chipDragId=name;chipFromZone=fromZone;setTimeout(()=>e.target.classList.add('dragging'),0);}
+function chipDragEnd(e){e.target.classList.remove('dragging');}
+function dropZoneDragOver(e,i){e.preventDefault();document.getElementById('drop-'+i).classList.add('drag-over');}
+function dropZoneDragLeave(e,i){document.getElementById('drop-'+i).classList.remove('drag-over');}
+function dropZoneDrop(e,i){
+  e.preventDefault();
+  const zone=document.getElementById('drop-'+i);
+  zone.classList.remove('drag-over','correct','wrong');
+  if(dropZoneAnswers[i]) returnChipToPool(dropZoneAnswers[i]);
+  if(chipFromZone!==null&&chipFromZone!==i){
+    dropZoneAnswers[chipFromZone]=null;
+    const oz=document.getElementById('drop-'+chipFromZone);
+    oz.innerHTML='วางที่นี่';oz.className='drop-zone';
+  }
+  const l=osiActivity.find(x=>x.answer===chipDragId);
+  dropZoneAnswers[i]=chipDragId;
+  zone.innerHTML=`<div class="chip" draggable="true" style="background:${l.color};color:${l.tc};border-color:${l.tc}40"
+    ondragstart="chipDragStart(event,'${chipDragId}',${i})" ondragend="chipDragEnd(event)">${chipDragId}</div>`;
+  if(chipFromZone===null){const pc=document.getElementById('chip-'+chipDragId.replace(/\s/g,'-'));if(pc)pc.remove();}
+  chipDragId=null;chipFromZone=null;
+  document.getElementById('osi-act-score').textContent='';
+}
+function returnChipToPool(name){
+  if(document.getElementById('chip-'+name.replace(/\s/g,'-'))) return;
+  const l=osiActivity.find(x=>x.answer===name);
+  const div=document.createElement('div');
+  div.className='chip';div.id='chip-'+name.replace(/\s/g,'-');div.draggable=true;
+  div.style.background=l.color;div.style.color=l.tc;div.style.borderColor=l.tc+'40';
+  div.textContent=name;
+  div.setAttribute('ondragstart',`chipDragStart(event,'${name}',null)`);
+  div.setAttribute('ondragend','chipDragEnd(event)');
+  document.getElementById('chip-pool').appendChild(div);
+}
+function checkOSIActivity(){
+  let correct=0;
+  osiActivity.forEach((l,i)=>{
+    const z=document.getElementById('drop-'+i);
+    z.classList.remove('correct','wrong');
+    if(dropZoneAnswers[i]===l.answer){z.classList.add('correct');correct++;}
+    else if(dropZoneAnswers[i]) z.classList.add('wrong');
+  });
+  const filled=Object.values(dropZoneAnswers).filter(Boolean).length;
+  const sc=document.getElementById('osi-act-score');
+  if(filled<osiActivity.length) sc.innerHTML=`<span style="color:var(--warn-txt)">⚠️ วางยังไม่ครบ (${filled}/${osiActivity.length})</span>`;
+  else if(correct===osiActivity.length) sc.innerHTML=`<span style="color:var(--success-txt);font-weight:700">🎉 ถูกทั้งหมด ${correct}/${osiActivity.length}!</span>`;
+  else sc.innerHTML=`<span style="color:var(--danger-txt)">ถูก ${correct}/${osiActivity.length} — ลองแก้ไขช่องสีแดง</span>`;
+}
+function resetOSIActivity(){dropZoneAnswers={};chipFromZone=null;chipDragId=null;document.getElementById('osi-act-score').textContent='';renderOSIActivity();attachPoolDrop();}
+function attachPoolDrop(){
+  setTimeout(()=>{
+    const pool=document.getElementById('chip-pool');if(!pool)return;
+    pool.addEventListener('dragover',e=>{e.preventDefault();pool.style.borderColor='#4A6FE3';});
+    pool.addEventListener('dragleave',()=>{pool.style.borderColor='';});
+    pool.addEventListener('drop',e=>{
+      e.preventDefault();pool.style.borderColor='';
+      if(!chipDragId)return;
+      if(chipFromZone!==null){dropZoneAnswers[chipFromZone]=null;const z=document.getElementById('drop-'+chipFromZone);z.innerHTML='วางที่นี่';z.className='drop-zone';}
+      returnChipToPool(chipDragId);chipDragId=null;chipFromZone=null;
+    });
+  },50);
+}
+
+// ════ PACKET ════
+function renderPacket(){
+  document.getElementById('packet-layers').innerHTML=packetData.map((p,i)=>`
+    <div class="packet-layer">
+      <div class="pl-header" style="background:${p.color};color:${p.tc}" onclick="togglePL(${i})">
+        <span>${p.name} <span class="badge" style="background:${p.tc}20;color:${p.tc};margin-left:6px">${p.pdu}</span></span>
+        <span id="pl-arr-${i}">▸</span>
+      </div>
+      <div class="pl-body" id="pl-body-${i}">
+        ${p.fields.map(f=>`<div class="pl-field"><span class="pl-key">${f[0]}</span><span class="pl-val">${f[1]}</span></div>`).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+function togglePL(i){const b=document.getElementById('pl-body-'+i),a=document.getElementById('pl-arr-'+i);const o=b.classList.contains('open');b.classList.toggle('open',!o);a.textContent=o?'▸':'▾';}
+
+// ════ ATTACK ════
+function renderAttackGrid(){
+  document.getElementById('attack-grid').innerHTML=attacks.map(a=>`
+    <div class="attack-btn" id="atk-${a.id}" onclick="selectAttack('${a.id}')">
+      <div style="font-size:24px;margin-bottom:5px">${a.icon}</div>
+      <div class="ab-title">${a.name}</div>
+      <div class="ab-sub">${a.sub}</div>
+    </div>
+  `).join('');
+}
+function selectAttack(id){
+  selectedAttack=attacks.find(a=>a.id===id);
+  document.querySelectorAll('.attack-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('atk-'+id).classList.add('selected');
+  document.getElementById('attack-log').innerHTML='<div style="color:#8b949e">// พร้อมจำลอง — กด ▶ เพื่อเริ่ม</div>';
+  document.getElementById('attack-info').style.display='block';
+  document.getElementById('ai-title').textContent=selectedAttack.name+' — คืออะไร?';
+  document.getElementById('ai-body').innerHTML=`<p style="margin-bottom:8px">${selectedAttack.info}</p><p style="color:var(--success-txt)"><strong>การป้องกัน:</strong> ${selectedAttack.defense}</p>`;
+}
+function runAttack(){
+  if(!selectedAttack){alert('กรุณาเลือกประเภทการโจมตีก่อน');return;}
+  const log=document.getElementById('attack-log');log.innerHTML='';
+  let d=0;
+  selectedAttack.logs.forEach(l=>{
+    setTimeout(()=>{
+      const cls=l.t==='DANGER'?'log-danger':l.t==='OK'?'log-ok':'log-warn';
+      const pfx=l.t==='DANGER'?'[!] ALERT':l.t==='OK'?'[✓] DEFEND':'[~] WARN';
+      log.innerHTML+=`<div class="log-line ${cls}">${pfx}: ${l.m}</div>`;
+      log.scrollTop=log.scrollHeight;
+    },d);d+=430;
+  });
+}
+function clearLog(){document.getElementById('attack-log').innerHTML='<div style="color:#8b949e">// Log cleared</div>';}
+
+// ════ ENCRYPTION ════
+const methods={
+  caesar:{name:"Caesar Cipher (ROT13)",desc:"การเข้ารหัสแบบโบราณ เลื่อนตัวอักษรทีละ 13 ตำแหน่ง เช่น A→N เป็น Symmetric อย่างง่าย ปัจจุบันไม่ปลอดภัย",fn:t=>t.replace(/[a-zA-Z]/g,c=>String.fromCharCode(c.charCodeAt(0)+(c.toLowerCase()<'n'?13:-13)))},
+  base64:{name:"Base64 Encoding",desc:"ไม่ใช่ Encryption แต่เป็นการ Encode ข้อมูล Binary เป็น ASCII 64 ตัวอักษร ใช้ใน Email, JWT Token, HTTP Header",fn:t=>btoa(unescape(encodeURIComponent(t)))},
+  hash:  {name:"Simple Hash (Demo)",desc:"Hash Function แปลงข้อมูลเป็น String คงที่ ไม่สามารถย้อนกลับได้ (One-way) ใช้เก็บรหัสผ่าน ตรวจสอบ Integrity เช่น SHA-256",fn:t=>{let h=5381;for(let i=0;i<t.length;i++) h=(h*33^t.charCodeAt(i))>>>0;return '0x'+h.toString(16).toUpperCase().padStart(8,'0')+'...SHA256-like';}},
+  xor:   {name:"XOR Cipher",desc:"เข้ารหัสด้วยการ XOR bit กับ Key เป็นพื้นฐานของการเข้ารหัสสมัยใหม่ OTP (One-Time Pad) ถือว่าปลอดภัยทางทฤษฎี",fn:t=>{const k=42;return Array.from(t).map(c=>(c.charCodeAt(0)^k).toString(16).padStart(2,'0')).join(' ');}},
+};
+function setMethod(m){
+  currentMethod=m;
+  ['caesar','b64','hash','xor'].forEach(id=>document.getElementById('btn-'+id)?.classList.remove('btn-primary'));
+  const map={caesar:'caesar',base64:'b64',hash:'hash',xor:'xor'};
+  document.getElementById('btn-'+(map[m]||m))?.classList.add('btn-primary');
+  document.getElementById('method-desc').textContent=methods[m].name+' — '+methods[m].desc;
+  updateEncryption();
+}
+function updateEncryption(){
+  const t=document.getElementById('plain-input').value;
+  document.getElementById('show-plain').textContent=t||'—';
+  try{document.getElementById('show-cipher').textContent=methods[currentMethod]?.fn(t)||'—';}
+  catch{document.getElementById('show-cipher').textContent='Error';}
+}
+function renderEncTable(){
+  document.getElementById('enc-table').innerHTML=encTable.map((r,ri)=>`
+    <tr style="border-bottom:1px solid var(--border);${ri%2===0?'background:var(--bg-muted)':''}">
+      ${r.map((c,i)=>`<td style="padding:9px 10px;color:${i===0?'var(--info-txt)':'var(--txt)'};font-size:13px;font-weight:${i===0?'600':'400'}">${c}</td>`).join('')}
+    </tr>
+  `).join('');
+}
+
+// ════ QUIZ ════
+function loadQuiz(){qIdx=0;qScore=0;qAnswered=false;document.getElementById('quiz-area').style.display='block';document.getElementById('quiz-result').style.display='none';renderQuestion();}
+function renderQuestion(){
+  const q=quizData[qIdx];
+  document.getElementById('q-prog').style.width=(qIdx/quizData.length*100)+'%';
+  document.getElementById('q-counter').innerHTML=`<span>คำถามที่ ${qIdx+1} / ${quizData.length}</span><span id="q-score-inline">คะแนน: ${qScore}/${qIdx}</span>`;
+  document.getElementById('q-text').textContent=q.q;
+  document.getElementById('q-opts').innerHTML=q.opts.map((o,i)=>`<button class="quiz-opt" id="qopt-${i}" onclick="answerQ(${i})">${String.fromCharCode(65+i)}. ${o}</button>`).join('');
+  const fb=document.getElementById('q-feedback');fb.classList.remove('show');fb.textContent='';
+  document.getElementById('q-next').style.display='none';qAnswered=false;
+}
+function answerQ(chosen){
+  if(qAnswered)return;qAnswered=true;
+  const q=quizData[qIdx];const ok=chosen===q.ans;if(ok)qScore++;
+  document.querySelectorAll('.quiz-opt').forEach((b,i)=>{b.disabled=true;if(i===q.ans)b.classList.add('correct');if(i===chosen&&!ok)b.classList.add('wrong');});
+  const fb=document.getElementById('q-feedback');
+  fb.style.background=ok?'var(--success-bg)':'var(--danger-bg)';
+  fb.style.color=ok?'var(--success-txt)':'var(--danger-txt)';
+  fb.textContent=(ok?'✓ ถูกต้อง! ':'✗ ไม่ถูกต้อง ')+q.ex;fb.classList.add('show');
+  document.getElementById('q-counter').innerHTML=`<span>คำถามที่ ${qIdx+1} / ${quizData.length}</span><span>คะแนน: ${qScore}/${qIdx+1}</span>`;
+  document.getElementById('q-next').style.display=qIdx<quizData.length-1?'block':'none';
+  if(qIdx>=quizData.length-1) setTimeout(showResult,800);
+}
+function nextQuestion(){qIdx++;renderQuestion();}
+function showResult(){
+  document.getElementById('quiz-area').style.display='none';document.getElementById('quiz-result').style.display='block';
+  const pct=Math.round(qScore/quizData.length*100);
+  document.getElementById('score-pct').textContent=pct+'%';
+  const arc=document.getElementById('score-arc'),circ=214;
+  setTimeout(()=>{arc.style.transition='stroke-dashoffset .8s';arc.style.strokeDashoffset=circ-circ*pct/100;},100);
+  const grade=pct>=80?'🏆 ยอดเยี่ยม':pct>=60?'👍 ผ่าน':'📚 ต้องฝึกเพิ่ม';
+  document.getElementById('result-grid').innerHTML=`
+    <div class="result-stat"><div class="rs-val" style="color:var(--success-txt)">${qScore}</div><div class="rs-label">ตอบถูก</div></div>
+    <div class="result-stat"><div class="rs-val" style="color:var(--danger-txt)">${quizData.length-qScore}</div><div class="rs-label">ตอบผิด</div></div>
+    <div class="result-stat"><div class="rs-val">${pct}%</div><div class="rs-label">คะแนน</div></div>
+    <div class="result-stat"><div class="rs-val" style="font-size:15px">${grade}</div><div class="rs-label">ระดับ</div></div>`;
+}
+function restartQuiz(){loadQuiz();}
+
+// ════ NETWORK DESIGN ════
+function renderDevicePalette(){
+  document.getElementById('device-palette').innerHTML=deviceTypes.map(d=>`
+    <div class="palette-item" draggable="true" ondragstart="paletteDragStart(event,'${d.id}')" title="${d.desc}">
+      <span style="font-size:18px">${d.icon}</span><span>${d.label}</span>
+    </div>`).join('');
+}
+function paletteDragStart(e,id){draggingDeviceType=id;e.dataTransfer.effectAllowed='copy';}
+function canvasDragOver(e){e.preventDefault();document.getElementById('net-canvas').classList.add('drag-over-canvas');}
+function canvasDragLeave(e){document.getElementById('net-canvas').classList.remove('drag-over-canvas');}
+function canvasDrop(e){
+  e.preventDefault();document.getElementById('net-canvas').classList.remove('drag-over-canvas');
+  if(!draggingDeviceType)return;
+  const canvas=document.getElementById('net-canvas'),rect=canvas.getBoundingClientRect();
+  const dt=deviceTypes.find(d=>d.id===draggingDeviceType);
+  const node={id:'n'+(++nodeIdCounter),type:draggingDeviceType,x:Math.max(0,Math.min(e.clientX-rect.left-26,rect.width-52)),y:Math.max(0,Math.min(e.clientY-rect.top-26,rect.height-70)),label:dt.label+' '+(nodes.filter(n=>n.type===draggingDeviceType).length+1),icon:dt.icon,color:dt.color};
+  saveHistory();nodes.push(node);draggingDeviceType=null;renderCanvas();updateInfoBar();
+}
+function setTool(tool){
+  currentTool=tool;connectFrom=null;
+  document.querySelectorAll('.tool-btn[id^="tool-"]').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tool-'+tool)?.classList.add('active');
+  const ind=document.getElementById('mode-indicator'),lbl=document.getElementById('tool-mode-label');
+  if(tool==='connect'){ind.textContent='🔗 โหมด: เชื่อมต่ออุปกรณ์';ind.className='mode-indicator connect-mode';lbl.textContent='เชื่อมต่ออุปกรณ์';document.getElementById('info-hint').textContent='คลิกอุปกรณ์แรก จากนั้นคลิกอุปกรณ์ที่สอง';}
+  else{ind.textContent='🖱 โหมด: เลือก/ย้าย';ind.className='mode-indicator';lbl.textContent='เลือก/ย้าย';document.getElementById('info-hint').textContent='คลิกเพื่อเลือก, ลากเพื่อย้ายอุปกรณ์';}
+  renderCanvas();
+}
+function renderCanvas(){
+  const canvas=document.getElementById('net-canvas');
+  canvas.querySelectorAll('.net-node').forEach(e=>e.remove());
+  nodes.forEach(node=>{
+    const div=document.createElement('div');
+    div.className='net-node'+(selectedNode===node.id?' selected':'');
+    div.id='node-'+node.id;div.style.left=node.x+'px';div.style.top=node.y+'px';
+    div.innerHTML=`<button class="delete-btn" onclick="deleteNode('${node.id}',event)">✕</button><div class="net-node-icon" style="background:${node.color}">${node.icon}</div><div class="net-node-label">${node.label}</div>`;
+    div.addEventListener('mousedown',e=>nodeMouseDown(e,node.id));
+    div.addEventListener('click',e=>nodeClick(e,node.id));
+    canvas.appendChild(div);
+  });
+  drawConnections();
+}
+function drawConnections(){
+  const svg=document.getElementById('canvas-svg');svg.innerHTML='';
+  connections.forEach(conn=>{
+    const a=nodes.find(n=>n.id===conn.from),b=nodes.find(n=>n.id===conn.to);
+    if(!a||!b)return;
+    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',a.x+26);line.setAttribute('y1',a.y+26);
+    line.setAttribute('x2',b.x+26);line.setAttribute('y2',b.y+26);
+    line.setAttribute('class','net-connection');svg.appendChild(line);
+  });
+}
+function nodeMouseDown(e,id){
+  if(currentTool!=='select')return;e.stopPropagation();
+  const canvas=document.getElementById('net-canvas'),rect=canvas.getBoundingClientRect();
+  const node=nodes.find(n=>n.id===id);
+  let ox=e.clientX-rect.left-node.x,oy=e.clientY-rect.top-node.y;
+  function onMove(ev){const nr=canvas.getBoundingClientRect();node.x=Math.max(0,Math.min(ev.clientX-nr.left-ox,nr.width-52));node.y=Math.max(0,Math.min(ev.clientY-nr.top-oy,nr.height-70));renderCanvas();}
+  function onUp(){window.removeEventListener('mousemove',onMove);window.removeEventListener('mouseup',onUp);}
+  window.addEventListener('mousemove',onMove);window.addEventListener('mouseup',onUp);
+}
+function nodeClick(e,id){
+  e.stopPropagation();
+  if(currentTool==='select'){selectedNode=(selectedNode===id)?null:id;renderCanvas();}
+  else if(currentTool==='connect'){
+    if(!connectFrom){connectFrom=id;document.getElementById('info-hint').textContent='เลือกอุปกรณ์ที่ 2 เพื่อสร้างการเชื่อมต่อ';renderCanvas();}
+    else if(connectFrom!==id){
+      if(!connections.find(c=>(c.from===connectFrom&&c.to===id)||(c.from===id&&c.to===connectFrom))){saveHistory();connections.push({from:connectFrom,to:id});updateInfoBar();}
+      connectFrom=null;document.getElementById('info-hint').textContent='คลิกอุปกรณ์แรก จากนั้นคลิกอุปกรณ์ที่สอง';renderCanvas();
+    }else{connectFrom=null;renderCanvas();}
+  }
+}
+function deleteNode(id,e){e.stopPropagation();saveHistory();nodes=nodes.filter(n=>n.id!==id);connections=connections.filter(c=>c.from!==id&&c.to!==id);selectedNode=null;renderCanvas();updateInfoBar();}
+function clearCanvas(){if(!nodes.length&&!connections.length)return;saveHistory();nodes=[];connections=[];selectedNode=null;connectFrom=null;renderCanvas();updateInfoBar();document.getElementById('verify-result').className='verify-result';}
+function undoLast(){if(!history.length)return;const p=history.pop();nodes=p.nodes;connections=p.connections;selectedNode=null;renderCanvas();updateInfoBar();}
+function saveHistory(){history.push({nodes:nodes.map(n=>({...n})),connections:connections.map(c=>({...c}))});if(history.length>20)history.shift();}
+function updateInfoBar(){document.getElementById('info-devices').textContent=nodes.length;document.getElementById('info-connections').textContent=connections.length;}
+function renderChallenge(){
+  const c=challenges[currentChallenge];
+  document.getElementById('chal-title').textContent=c.title;
+  document.getElementById('chal-desc').textContent=c.desc;
+  document.getElementById('chal-idx').textContent=`${currentChallenge+1} / ${challenges.length}`;
+  document.getElementById('chal-reqs').innerHTML=c.reqs.map((r,i)=>`<li><div class="req-check" id="req-check-${i}"></div><span>${r.text}</span></li>`).join('');
+  document.getElementById('verify-result').className='verify-result';
+}
+function nextChallenge(){currentChallenge=(currentChallenge+1)%challenges.length;clearCanvas();renderChallenge();}
+function prevChallenge(){currentChallenge=(currentChallenge-1+challenges.length)%challenges.length;clearCanvas();renderChallenge();}
+function verifyDesign(){
+  const chal=challenges[currentChallenge];let score=0;
+  const countType=t=>nodes.filter(n=>n.type===t).length;
+  const hasConn=(ta,tb)=>connections.some(c=>{const na=nodes.find(n=>n.id===c.from),nb=nodes.find(n=>n.id===c.to);return(na?.type===ta&&nb?.type===tb)||(na?.type===tb&&nb?.type===ta);});
+  const allConnTo=(ta,tb)=>{const of=nodes.filter(n=>n.type===ta);if(!of.length)return false;return of.every(node=>connections.some(c=>{const o=c.from===node.id?c.to:c.to===node.id?c.from:null;if(!o)return false;return nodes.find(n=>n.id===o)?.type===tb;}));};
+  chal.reqs.forEach((req,i)=>{
+    let ok=false;
+    if(req.key==='conn_pc_router') ok=hasConn('pc','router');
+    else if(req.key==='conn_smart_router') ok=hasConn('smartphone','router');
+    else if(req.key==='conn_pc_switch') ok=allConnTo('pc','switch');
+    else if(req.key==='conn_switch_router') ok=hasConn('switch','router');
+    else if(req.key==='conn_router_fw') ok=hasConn('router','firewall');
+    else if(req.min!==undefined) ok=countType(req.key)>=req.min;
+    const ch=document.getElementById('req-check-'+i);
+    if(ok){ch.classList.add('done');ch.textContent='✓';score++;}else{ch.classList.remove('done');ch.textContent='';}
+  });
+  const vr=document.getElementById('verify-result');vr.className='verify-result show';
+  if(score===chal.reqs.length){vr.style.background='var(--success-bg)';vr.style.color='var(--success-txt)';vr.textContent=`🎉 ยอดเยี่ยม! ผ่านโจทย์ครบ (${score}/${chal.reqs.length})`;}
+  else{vr.style.background='var(--warn-bg)';vr.style.color='var(--warn-txt)';vr.textContent=`ผ่าน ${score}/${chal.reqs.length} ข้อ — ตรวจสอบเครื่องหมาย ✓`;}
+}
+
+// ════ PRINTER SHARE ════
+let selectedClientId=null;
+function selectClient(id){
+  document.querySelectorAll('.pc-box').forEach(b=>b.classList.remove('selected'));
+  document.getElementById(id)?.classList.add('selected');
+  selectedClientId=id;
+  const map={'pc-client1':'client1','pc-client2':'client2','pc-client3':'client3'};
+  document.getElementById('printer-client-select').value=id.replace('pc-','');
+}
+function appendPrintLog(msg,cls=''){
+  const log=document.getElementById('print-log');
+  const d=document.createElement('div');d.className='log-line '+(cls||'');
+  const ts=new Date().toLocaleTimeString('th-TH',{hour12:false});
+  d.textContent=`[${ts}] ${msg}`;log.appendChild(d);log.scrollTop=log.scrollHeight;
+}
+function runPrinterShare(){
+  const client=document.getElementById('printer-client-select').value;
+  const doc=document.getElementById('printer-doc-select').value;
+  const docNames={report:'รายงาน_ภาคเรียน1.pdf (2 หน้า)',excel:'ตารางสรุป.xlsx (1 หน้า)',word:'แบบฝึกหัดเครือข่าย.docx (5 หน้า)'};
+  const clientNames={client1:'PC-Client1 (192.168.1.11)',client2:'PC-Client2 (192.168.1.12)',client3:'PC-Client3 (192.168.1.13)'};
+  document.getElementById('print-log').innerHTML='';
+  document.getElementById('printer-status').textContent='กำลังพิมพ์...';
+  document.getElementById('printer-status').style.background='#FEF3C7';
+  document.getElementById('printer-status').style.color='#92400E';
+  const steps=[
+    {delay:0,  msg:`[${clientNames[client]}] ส่งคำสั่งพิมพ์: ${docNames[doc]}`,cls:'log-ok'},
+    {delay:400,msg:`Connecting to \\\\PC-Host\\Printer...`,cls:''},
+    {delay:800,msg:`SMB session established — Port 445`,cls:'log-ok'},
+    {delay:1200,msg:`Authentication: ผ่านแล้ว (Workgroup\\Guest)`,cls:'log-ok'},
+    {delay:1600,msg:`Spooling document to print queue...`,cls:''},
+    {delay:2000,msg:`Print job ID: PJ-${Math.floor(Math.random()*9000)+1000} — Queued`,cls:'log-ok'},
+    {delay:2400,msg:`HP LaserJet: กำลังประมวลผล...`,cls:''},
+    {delay:2900,msg:`Printing page 1... ✓`,cls:'log-ok'},
+    {delay:3300,msg:`Print complete — ${docNames[doc]}`,cls:'log-ok'},
+  ];
+  steps.forEach(s=>{
+    setTimeout(()=>{
+      appendPrintLog(s.msg,s.cls);
+      if(s.delay===3300){
+        document.getElementById('printer-status').textContent='พร้อมใช้งาน';
+        document.getElementById('printer-status').style.background='#D4F7E7';
+        document.getElementById('printer-status').style.color='#0A6B46';
+      }
+    },s.delay);
+  });
+}
+function setupPrinterShare(){
+  document.getElementById('print-log').innerHTML='';
+  const steps=[
+    {delay:0,  msg:'[PC-Host] เปิด Control Panel → Network and Sharing Center',cls:''},
+    {delay:500,msg:'Change advanced sharing settings → เปิด File and Printer Sharing ✓',cls:'log-ok'},
+    {delay:1000,msg:'Devices and Printers → HP LaserJet → Properties → Sharing',cls:''},
+    {delay:1500,msg:'Share this printer: ✓  Share Name: "Printer" ✓',cls:'log-ok'},
+    {delay:2000,msg:'Firewall: อนุญาต TCP Port 139, 445 (SMB) ✓',cls:'log-ok'},
+    {delay:2500,msg:'[PC-Client] เปิด File Explorer → พิมพ์ \\\\192.168.1.10',cls:''},
+    {delay:3000,msg:'พบเครื่องพิมพ์ "Printer" บน PC-Host → คลิกขวา Connect',cls:'log-ok'},
+    {delay:3500,msg:'Driver ติดตั้งสำเร็จ — HP LaserJet พร้อมใช้งาน ✓',cls:'log-ok'},
+  ];
+  steps.forEach(s=>setTimeout(()=>appendPrintLog(s.msg,s.cls),s.delay));
+}
+function clearPrintLog(){document.getElementById('print-log').innerHTML='<span style="color:#8b949e">// Log cleared</span>';}
+
+// ════ IP CONFIG ════
+function validateIP(ip){
+  const parts=ip.trim().split('.');
+  if(parts.length!==4)return false;
+  return parts.every(p=>{const n=parseInt(p);return !isNaN(n)&&n>=0&&n<=255&&String(n)===p;});
+}
+function getIPClass(ip){
+  const first=parseInt(ip.split('.')[0]);
+  if(first>=1&&first<=126) return{cls:'A',range:'1.0.0.0 – 126.255.255.255',hosts:'16,777,214',color:'#D9ECFF',tc:'#084F96'};
+  if(first>=128&&first<=191) return{cls:'B',range:'128.0.0.0 – 191.255.255.255',hosts:'65,534',color:'#E4F5D4',tc:'#2B5F10'};
+  if(first>=192&&first<=223) return{cls:'C',range:'192.0.0.0 – 223.255.255.255',hosts:'254',color:'#EDE9FF',tc:'#4C2E9E'};
+  if(first>=224&&first<=239) return{cls:'D (Multicast)',range:'224.0.0.0 – 239.255.255.255',hosts:'—',color:'#FFF3DA',tc:'#7A4800'};
+  return{cls:'E (Reserved)',range:'240.0.0.0 – 255.255.255.255',hosts:'—',color:'#FFE8E8',tc:'#8B1E1E'};
+}
+function calcNetwork(ip,mask){
+  try{
+    const ipParts=ip.split('.').map(Number),maskParts=mask.split('.').map(Number);
+    const netParts=ipParts.map((p,i)=>p&maskParts[i]);
+    const broadParts=netParts.map((p,i)=>p|(~maskParts[i]&255));
+    const cidr=maskParts.reduce((s,p)=>s+p.toString(2).split('').filter(b=>b==='1').length,0);
+    const firstHost=[...netParts];firstHost[3]+=1;
+    const lastHost=[...broadParts];lastHost[3]-=1;
+    const usable=Math.pow(2,32-cidr)-2;
+    return{
+      network:netParts.join('.'),broadcast:broadParts.join('.'),cidr,
+      firstHost:firstHost.join('.'),lastHost:lastHost.join('.'),usable:Math.max(0,usable)
+    };
+  }catch{return null;}
+}
+function analyzeIP(){
+  const ip=document.getElementById('ip-addr').value.trim();
+  const mask=document.getElementById('ip-mask').value.trim();
+  const gw=document.getElementById('ip-gw').value.trim();
+  const dns=document.getElementById('ip-dns').value.trim();
+  const ipEl=document.getElementById('ip-addr'),maskEl=document.getElementById('ip-mask');
+  const gwEl=document.getElementById('ip-gw'),dnsEl=document.getElementById('ip-dns');
+  const ipOk=validateIP(ip),maskOk=validateIP(mask),gwOk=validateIP(gw),dnsOk=validateIP(dns);
+  ipEl.className='ip-input '+(ipOk?'valid':'invalid');
+  maskEl.className='ip-input '+(maskOk?'valid':'invalid');
+  gwEl.className='ip-input '+(gwOk?'valid':'invalid');
+  dnsEl.className='ip-input '+(dnsOk?'valid':'invalid');
+  if(!ipOk||!maskOk){document.getElementById('ip-result-area').innerHTML='<div style="color:var(--danger-txt);font-size:13px;padding:8px 0">⚠️ รูปแบบ IP Address ไม่ถูกต้อง</div>';return;}
+  const cls=getIPClass(ip);
+  const net=calcNetwork(ip,mask);
+  let sameNet=gwOk?'—':'—';
+  if(gwOk&&net){
+    const gwNet=calcNetwork(gw,mask);
+    sameNet=gwNet&&gwNet.network===net.network?'✅ อยู่ใน Subnet เดียวกัน':'❌ ต่าง Subnet';
+  }
+  document.getElementById('ip-result-area').innerHTML=`
+    <div class="ip-result-card">
+      <div class="ip-result-row"><span class="ip-result-key">IP Class</span><span class="ip-result-val"><span class="ip-class-badge" style="background:${cls.color};color:${cls.tc}">Class ${cls.cls}</span></span></div>
+      <div class="ip-result-row"><span class="ip-result-key">Range ของ Class นี้</span><span class="ip-result-val">${cls.range}</span></div>
+      ${net?`
+      <div class="ip-result-row"><span class="ip-result-key">Network Address</span><span class="ip-result-val">${net.network}/${net.cidr}</span></div>
+      <div class="ip-result-row"><span class="ip-result-key">Broadcast Address</span><span class="ip-result-val">${net.broadcast}</span></div>
+      <div class="ip-result-row"><span class="ip-result-key">Host แรก – Host สุดท้าย</span><span class="ip-result-val">${net.firstHost} – ${net.lastHost}</span></div>
+      <div class="ip-result-row"><span class="ip-result-key">จำนวน Host ที่ใช้ได้</span><span class="ip-result-val">${net.usable.toLocaleString()} เครื่อง</span></div>
+      `:''}
+      <div class="ip-result-row"><span class="ip-result-key">Default Gateway</span><span class="ip-result-val">${sameNet}</span></div>
+      <div class="ip-result-row"><span class="ip-result-key">DNS Server</span><span class="ip-result-val">${dnsEl.classList.contains('valid')?'✅ รูปแบบถูกต้อง':'⚠️ ตรวจสอบอีกครั้ง'}</span></div>
+    </div>`;
+  updateIPVisual(ip,gw);
+}
+function updateIPVisual(ip,gw){
+  document.getElementById('ip-visual').innerHTML=`
+    <div class="ip-device highlight"><div class="ip-device-icon">💻</div><div style="font-size:12px;font-weight:600">เครื่องนี้</div><div class="ip-device-ip">${ip}</div></div>
+    <div class="ip-line active"></div>
+    <div class="ip-device"><div class="ip-device-icon">🌐</div><div style="font-size:12px;font-weight:600">Gateway</div><div class="ip-device-ip">${gw||'—'}</div></div>
+    <div class="ip-line"></div>
+    <div class="ip-device"><div class="ip-device-icon">☁️</div><div style="font-size:12px;font-weight:600">Internet</div><div class="ip-device-ip">8.8.8.8</div></div>`;
+}
+function runPing(){
+  const myIP=document.getElementById('ip-addr').value.trim();
+  const target=document.getElementById('ping-target').value.trim();
+  const out=document.getElementById('ping-output');out.innerHTML='';
+  if(!validateIP(target)){out.innerHTML='<span style="color:#ff6b6b">Error: IP Address ไม่ถูกต้อง</span>';return;}
+  const myNet=validateIP(myIP)?calcNetwork(myIP,document.getElementById('ip-mask').value.trim()):null;
+  const tNet=calcNetwork(target,document.getElementById('ip-mask').value.trim());
+  const sameNet=myNet&&tNet&&myNet.network===tNet.network;
+  const success=sameNet||target==='8.8.8.8'||target==='1.1.1.1'||target===document.getElementById('ip-gw').value.trim();
+  out.innerHTML=`<span style="color:#8b949e">Pinging ${target} ...\n\n</span>`;
+  let i=0;
+  const interval=setInterval(()=>{
+    if(i>=4){clearInterval(interval);
+      const avg=success?Math.floor(Math.random()*5+1):0;
+      out.innerHTML+=`\n<span style="color:${success?'#56d364':'#ff6b6b'}">Ping statistics for ${target}:\n  Packets: Sent=4, Received=${success?4:0}, Lost=${success?0:4} (${success?0:100}% loss)\n  ${success?`Approximate round trip times:\n  Minimum=${avg}ms, Maximum=${avg+3}ms, Average=${avg+1}ms`:'Request timed out.'}</span>`;
+      out.scrollTop=out.scrollHeight;return;
+    }
+    const ms=success?Math.floor(Math.random()*5+1):0;
+    const line=success?`Reply from ${target}: bytes=32 time=${ms}ms TTL=64\n`:`Request timeout for icmp_seq ${i+1}\n`;
+    out.innerHTML+=`<span style="color:${success?'#56d364':'#ff6b6b'}">${line}</span>`;
+    out.scrollTop=out.scrollHeight;i++;
+  },500);
+}
+function renderIPScenarios(){
+  document.getElementById('ip-scenarios').innerHTML=ipScenarios.map((s,i)=>`
+    <div class="ip-scenario" onclick="loadScenario(${i})">
+      <div class="ip-scenario-title">${s.title}</div>
+      <div class="ip-scenario-desc">IP: ${s.ip} | Mask: ${s.mask} | GW: ${s.gw}</div>
+    </div>`).join('');
+}
+function loadScenario(i){
+  const s=ipScenarios[i];
+  document.getElementById('ip-addr').value=s.ip;
+  document.getElementById('ip-mask').value=s.mask;
+  document.getElementById('ip-gw').value=s.gw;
+  document.getElementById('ip-dns').value=s.dns;
+  document.querySelectorAll('.ip-scenario').forEach((el,idx)=>el.classList.toggle('active',idx===i));
+  analyzeIP();
+  switchTab('ipconfig',document.querySelector('.tab[data-sec="ipconfig"]'));
+}
+
+// ════ BOOT ════
+window.addEventListener('DOMContentLoaded',()=>{
+  init();setTool('select');attachPoolDrop();
+  document.addEventListener('click',e=>{
+    if(e.target.id==='net-canvas'||(!e.target.closest('.net-node')&&e.target.closest('.canvas-area'))){
+      selectedNode=null;connectFrom=null;renderCanvas();
+    }
+  });
+});
+</script>
+</body>
+</html>
