@@ -47,15 +47,17 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg-page);color:var(--txt)
 
 /* ─── Tabs ─── */
 .tabs{
-  display:flex;gap:5px;flex-wrap:wrap;
+  display:flex;gap:5px;flex-wrap:nowrap;
   margin-bottom:1.25rem;background:var(--bg-card);
   padding:7px;border-radius:14px;border:1px solid var(--border);box-shadow:var(--shadow-sm);
+  overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;
 }
+.tabs::-webkit-scrollbar{display:none;}
 .tab{
   padding:9px 13px;border-radius:9px;font-size:14px;
   cursor:pointer;border:none;background:transparent;color:var(--txt2);
   transition:all .18s;font-family:'Sarabun',sans-serif;font-weight:500;
-  display:flex;align-items:center;gap:5px;
+  display:flex;align-items:center;gap:5px;flex-shrink:0;white-space:nowrap;
 }
 .tab .tab-icon{font-size:16px;}
 .tab:hover:not(.active){background:var(--bg-muted);color:var(--txt);}
@@ -151,6 +153,7 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg-page);color:var(--txt)
   padding:7px 16px;border-radius:20px;font-size:13px;font-weight:600;
   cursor:grab;user-select:none;border:1.5px solid transparent;
   transition:transform .15s,box-shadow .15s;white-space:nowrap;
+  touch-action:none;
 }
 .chip:active{cursor:grabbing;}
 .chip.dragging{opacity:.4;}
@@ -241,6 +244,7 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg-page);color:var(--txt)
   display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:grab;
   font-size:13px;font-weight:600;color:var(--txt);background:var(--bg-card);
   border:1.5px solid var(--border);margin-bottom:6px;user-select:none;transition:all .15s;
+  touch-action:none;
 }
 .palette-item:hover{border-color:var(--netdesign-accent);background:var(--bg-hover);transform:translateX(2px);}
 .canvas-area{
@@ -249,7 +253,7 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg-page);color:var(--txt)
 }
 .canvas-area.drag-over-canvas{border-color:var(--netdesign-accent);background:#EEF8FF;}
 .canvas-area::before{content:'';position:absolute;inset:0;background-image:radial-gradient(var(--border) 1px,transparent 1px);background-size:24px 24px;opacity:.5;pointer-events:none;}
-.net-node{position:absolute;display:flex;flex-direction:column;align-items:center;cursor:move;user-select:none;z-index:5;transition:filter .15s;}
+.net-node{position:absolute;display:flex;flex-direction:column;align-items:center;cursor:move;user-select:none;z-index:5;transition:filter .15s;touch-action:none;}
 .net-node:hover{filter:drop-shadow(0 3px 8px rgba(0,0,0,.2));z-index:10;}
 .net-node-icon{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;border:2px solid transparent;background:var(--bg-card);box-shadow:0 2px 8px rgba(0,0,0,.12);transition:border-color .2s;}
 .net-node.selected .net-node-icon{border-color:var(--netdesign-accent);box-shadow:0 0 0 3px rgba(8,145,178,.25);}
@@ -1393,6 +1397,218 @@ function loadScenario(i){
   analyzeIP();
   switchTab('ipconfig',document.querySelector('.tab[data-sec="ipconfig"]'));
 }
+
+// ════ TOUCH: OSI CHIP DRAG-DROP ════
+(function(){
+  let touchChip=null,touchFromZone=null,touchClone=null,touchOffX=0,touchOffY=0;
+
+  function getChipMeta(el){
+    // find name from id: chip-Application → "Application", chip-Data-Link → "Data Link"
+    const id=el.id||'';
+    const m=id.match(/^chip-(.+)$/);
+    if(m) return m[1].replace(/-/g,' ');
+    // chip inside a drop zone has no id, read text
+    return el.textContent.trim();
+  }
+
+  function getZoneIndex(el){
+    const m=(el.id||'').match(/^drop-(\d+)$/);
+    return m?parseInt(m[1]):null;
+  }
+
+  document.addEventListener('touchstart',function(e){
+    const chip=e.target.closest('.chip');
+    if(!chip)return;
+    e.preventDefault();
+    const t=e.touches[0];
+    touchChip=chip;
+    touchFromZone=null;
+    // figure out if chip is inside a drop zone
+    const parentZone=chip.closest('.drop-zone');
+    if(parentZone) touchFromZone=getZoneIndex(parentZone);
+
+    chipDragId=getChipMeta(chip);
+    chipFromZone=touchFromZone;
+
+    const r=chip.getBoundingClientRect();
+    touchOffX=t.clientX-r.left;touchOffY=t.clientY-r.top;
+
+    // create floating clone
+    touchClone=chip.cloneNode(true);
+    touchClone.style.cssText=`position:fixed;z-index:9999;pointer-events:none;opacity:.85;
+      width:${r.width}px;left:${r.left}px;top:${r.top}px;margin:0;`;
+    document.body.appendChild(touchClone);
+    chip.style.opacity='.3';
+  },{passive:false});
+
+  document.addEventListener('touchmove',function(e){
+    if(!touchClone)return;
+    e.preventDefault();
+    const t=e.touches[0];
+    touchClone.style.left=(t.clientX-touchOffX)+'px';
+    touchClone.style.top=(t.clientY-touchOffY)+'px';
+    // highlight drop zones
+    document.querySelectorAll('.drop-zone').forEach(z=>{
+      const r=z.getBoundingClientRect();
+      if(t.clientX>=r.left&&t.clientX<=r.right&&t.clientY>=r.top&&t.clientY<=r.bottom)
+        z.classList.add('drag-over');
+      else z.classList.remove('drag-over');
+    });
+    // highlight chip-pool
+    const pool=document.getElementById('chip-pool');
+    if(pool){const r=pool.getBoundingClientRect();
+      if(t.clientX>=r.left&&t.clientX<=r.right&&t.clientY>=r.top&&t.clientY<=r.bottom)
+        pool.style.borderColor='#4A6FE3';
+      else pool.style.borderColor='';
+    }
+  },{passive:false});
+
+  document.addEventListener('touchend',function(e){
+    if(!touchClone)return;
+    e.preventDefault();
+    const t=e.changedTouches[0];
+    touchClone.remove();touchClone=null;
+    if(touchChip)touchChip.style.opacity='';
+
+    // find target drop zone
+    let landed=false;
+    document.querySelectorAll('.drop-zone').forEach(z=>{
+      z.classList.remove('drag-over');
+      const r=z.getBoundingClientRect();
+      if(!landed&&t.clientX>=r.left&&t.clientX<=r.right&&t.clientY>=r.top&&t.clientY<=r.bottom){
+        landed=true;
+        const i=getZoneIndex(z);
+        if(i===null)return;
+        // simulate drop
+        z.classList.remove('correct','wrong');
+        if(dropZoneAnswers[i]) returnChipToPool(dropZoneAnswers[i]);
+        if(chipFromZone!==null&&chipFromZone!==i){
+          dropZoneAnswers[chipFromZone]=null;
+          const oz=document.getElementById('drop-'+chipFromZone);
+          oz.innerHTML='วางที่นี่';oz.className='drop-zone';
+        }
+        const l=osiActivity.find(x=>x.answer===chipDragId);
+        if(!l)return;
+        dropZoneAnswers[i]=chipDragId;
+        z.innerHTML=`<div class="chip" draggable="true" style="background:${l.color};color:${l.tc};border-color:${l.tc}40"
+          ondragstart="chipDragStart(event,'${chipDragId}',${i})" ondragend="chipDragEnd(event)">${chipDragId}</div>`;
+        if(chipFromZone===null){const pc=document.getElementById('chip-'+chipDragId.replace(/\s/g,'-'));if(pc)pc.remove();}
+        chipDragId=null;chipFromZone=null;
+        document.getElementById('osi-act-score').textContent='';
+      }
+    });
+
+    // dropped back to pool?
+    if(!landed){
+      const pool=document.getElementById('chip-pool');
+      pool&&(pool.style.borderColor='');
+      if(pool){const r=pool.getBoundingClientRect();
+        if(t.clientX>=r.left&&t.clientX<=r.right&&t.clientY>=r.top&&t.clientY<=r.bottom){
+          if(chipFromZone!==null){
+            dropZoneAnswers[chipFromZone]=null;
+            const z=document.getElementById('drop-'+chipFromZone);
+            z.innerHTML='วางที่นี่';z.className='drop-zone';
+          }
+          returnChipToPool(chipDragId);chipDragId=null;chipFromZone=null;
+          landed=true;
+        }
+      }
+    }
+    touchChip=null;touchFromZone=null;
+  },{passive:false});
+})();
+
+// ════ TOUCH: NETWORK CANVAS ════
+(function(){
+  let touchNodeId=null,touchNodeOx=0,touchNodeOy=0;
+  let touchPaletteId=null;
+
+  // drag palette item onto canvas
+  document.addEventListener('touchstart',function(e){
+    const item=e.target.closest('.palette-item');
+    if(!item)return;
+    e.preventDefault();
+    // find device id from ondragstart attr
+    const attr=item.getAttribute('ondragstart')||'';
+    const m=attr.match(/'([^']+)'\)/);
+    if(!m)return;
+    touchPaletteId=m[1];
+    item.style.opacity='.5';
+  },{passive:false});
+
+  document.addEventListener('touchmove',function(e){
+    if(!touchPaletteId)return;
+    e.preventDefault();
+    const t=e.touches[0];
+    const canvas=document.getElementById('net-canvas');
+    if(!canvas)return;
+    const r=canvas.getBoundingClientRect();
+    if(t.clientX>=r.left&&t.clientX<=r.right&&t.clientY>=r.top&&t.clientY<=r.bottom)
+      canvas.classList.add('drag-over-canvas');
+    else canvas.classList.remove('drag-over-canvas');
+  },{passive:false});
+
+  document.addEventListener('touchend',function(e){
+    if(!touchPaletteId)return;
+    e.preventDefault();
+    const t=e.changedTouches[0];
+    const canvas=document.getElementById('net-canvas');
+    canvas&&canvas.classList.remove('drag-over-canvas');
+    document.querySelectorAll('.palette-item').forEach(i=>i.style.opacity='');
+
+    if(canvas){
+      const r=canvas.getBoundingClientRect();
+      if(t.clientX>=r.left&&t.clientX<=r.right&&t.clientY>=r.top&&t.clientY<=r.bottom){
+        const dt=deviceTypes.find(d=>d.id===touchPaletteId);
+        if(dt){
+          const node={id:'n'+(++nodeIdCounter),type:touchPaletteId,
+            x:Math.max(0,Math.min(t.clientX-r.left-26,r.width-52)),
+            y:Math.max(0,Math.min(t.clientY-r.top-26,r.height-70)),
+            label:dt.label+' '+(nodes.filter(n=>n.type===touchPaletteId).length+1),
+            icon:dt.icon,color:dt.color};
+          saveHistory();nodes.push(node);renderCanvas();updateInfoBar();
+        }
+      }
+    }
+    touchPaletteId=null;
+  },{passive:false});
+
+  // move nodes with touch
+  document.addEventListener('touchstart',function(e){
+    if(currentTool!=='select')return;
+    const nodeEl=e.target.closest('.net-node');
+    if(!nodeEl)return;
+    e.preventDefault();
+    const id=nodeEl.id.replace('node-','');
+    touchNodeId=id;
+    const canvas=document.getElementById('net-canvas');
+    const r=canvas.getBoundingClientRect();
+    const node=nodes.find(n=>n.id===id);
+    if(!node)return;
+    const t=e.touches[0];
+    touchNodeOx=t.clientX-r.left-node.x;
+    touchNodeOy=t.clientY-r.top-node.y;
+  },{passive:false});
+
+  document.addEventListener('touchmove',function(e){
+    if(!touchNodeId)return;
+    e.preventDefault();
+    const canvas=document.getElementById('net-canvas');
+    const r=canvas.getBoundingClientRect();
+    const t=e.touches[0];
+    const node=nodes.find(n=>n.id===touchNodeId);
+    if(!node)return;
+    node.x=Math.max(0,Math.min(t.clientX-r.left-touchNodeOx,r.width-52));
+    node.y=Math.max(0,Math.min(t.clientY-r.top-touchNodeOy,r.height-70));
+    renderCanvas();
+  },{passive:false});
+
+  document.addEventListener('touchend',function(e){
+    if(!touchNodeId)return;
+    e.preventDefault();
+    touchNodeId=null;
+  },{passive:false});
+})();
 
 // ════ BOOT ════
 window.addEventListener('DOMContentLoaded',()=>{
